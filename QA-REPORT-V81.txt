@@ -1,0 +1,36 @@
+LUACH V81 MUSIC FAST START + SELECT FIX QA
+Total checks: 13
+Passed: 13
+Failed: 0
+
+What this fixes:
+- A later/older openMusicUrl and music track implementation was overriding the newer shuffle logic.
+- Clicking a specific song now immediately switches the audio source to that song.
+- If a track has a directUrl/url from the folder listing, playback starts without waiting for the Apps Script musicFile dataUrl call.
+- The previous song is cleared while a selected song is loading, so it cannot keep playing the first song.
+- The playlist is cached in localStorage for up to 7 days, so the next music open can start faster while refreshing in the background.
+
+Files included:
+- patient.html
+- sw.js
+
+No Apps Script update is required.
+
+Changes:
+- patient.html: final music override fixes slow start and direct track selection
+- sw.js: cache bumped to V81
+
+Checks:
+- PASS: syntax patient.html
+- PASS: syntax sw.js
+- PASS: final override present
+- PASS: override is last track implementation
+- PASS: override is last load implementation
+- PASS: override is last open implementation
+- PASS: direct immediate playback
+- PASS: old audio cleared for slow fallback
+- PASS: playlist cache
+- PASS: selected track calls load
+- PASS: background refresh from cache
+- PASS: sw cache
+- PASS: markers

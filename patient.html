@@ -3882,7 +3882,7 @@ function musicHtml(){
   const err=window.__musicPlaylistErrorV51||"";
   const folderNote=folderId?`<div class="safeAudioNote">מנגן שירים מתוך תיקיית Drive דרך Apps Script, בלי לפתוח את Google Drive במסך.</div>`:`<div class="safeAudioNote">אם השמע לא התחיל לבד, אפשר ללחוץ על כפתור ההפעלה בנגן.</div>`;
   const tracks=list.length?`<div class="musicList">${list.map((f,i)=>`<button type="button" class="musicTrack ${i===(Number(window.__musicTrackIndexV51)||0)?"is-active":""}" data-a="musicTrack" data-i="${i}" data-allow-locked>🎵 ${esc(f.name||("שיר "+(i+1)))}</button>`).join("")}</div>`:"";
-  const player=src?`<div class="safeAudioCard"><audio id="safeMusicPlayer" class="safeAudioPlayer" controls autoplay preload="auto" src="${esc(src)}" onended="patientMusicNextV51()"></audio>${folderNote}</div>`:"";
+  const player=src?`<div class="safeAudioCard"><audio id="safeMusicPlayer" class="safeAudioPlayer" controls autoplay preload="auto" src="${esc(src)}" onended="patientMusicNextV51()" onerror="handleMusicPlayerErrorV87110()"></audio>${folderNote}</div>`:"";
   const waiting=(loading||trackLoading)?`<div class="big">${loading?"טוען שירים מהתיקייה...":"טוען את השיר..."}</div>`:"";
   const empty=!src&&!loading&&!trackLoading&&!list.length&&!err
     ?`<div class="big">${folderId?"התיקייה הוגדרה, אבל עדיין לא התקבלו שירים. אם זה נמשך, בדקו הרשאת Apps Script לתיקיית Drive ושיש בה קבצי MP3 ישירות בתוכה.":"לא נמצאה תיקיית Drive לשירים או קובץ שמע במסך הניהול."}</div>`
@@ -4736,16 +4736,60 @@ function musicRestorePlaylistCacheV81(folderId){
     return cached.list.filter(f=>f&&(f.fileId||f.id||f.url||f.directUrl));
   }catch(err){return []}
 }
+function musicProbablyPlayableSrcV87110(src){
+  src=String(src||"").trim();
+  if(!src)return false;
+  if(src.startsWith("data:audio/"))return true;
+  if(src.startsWith("blob:"))return true;
+  if(/^https?:\/\//i.test(src)){
+    if(/\.(mp3|m4a|mp4|aac|wav|wave|ogg|oga|webm|flac|opus|amr|3gp|3gpp)(\?|#|$)/i.test(src))return true;
+    // Google Drive /uc links often return an HTML warning page instead of audio.
+    // Use the protected Apps Script musicFile endpoint for those instead of
+    // feeding them straight to <audio>.
+    if(/drive\.google\.com\//i.test(src))return false;
+    return true;
+  }
+  return false;
+}
 function musicDirectUrlFromItemV81(item){
   item=item||{};
-  return String(item.dataUrl||item.directUrl||item.url||item.driveUrl||"").trim();
+  const data=String(item.dataUrl||"").trim();
+  if(data&&musicProbablyPlayableSrcV87110(data))return data;
+  const direct=String(item.directUrl||item.url||item.driveUrl||"").trim();
+  if(direct&&musicProbablyPlayableSrcV87110(direct))return direct;
+  return "";
+}
+function handleMusicPlayerErrorV87110(){
+  try{
+    const a=document.getElementById("safeMusicPlayer");
+    const code=a&&a.error?a.error.code:0;
+    const list=window.__musicPlaylistV51||[];
+    const idx=Number(window.__musicTrackIndexV51)||0;
+    if(list[idx])list[idx].__badPlaybackV87110=true;
+    window.__musicAudioUrl="";
+    window.__musicPlaylistErrorV51="השיר הזה לא נטען בדפדפן. אם זה קובץ Drive גדול, נסו קובץ MP3 קטן יותר או קובץ קצר יותר. אפשר לבחור שיר אחר מהרשימה.";
+    if(list.length>1){
+      const next=list.findIndex((x,i)=>i!==idx&&!x.__badPlaybackV87110);
+      if(next>=0){setTimeout(()=>loadMusicTrackDataUrlV56(next,true),250);return}
+    }
+    try{render()}catch{}
+  }catch(err){try{console.warn("music player error",err)}catch{}}
 }
 function playMusicElementSoonV81(delay=40){
   setTimeout(()=>{
     const a=document.getElementById("safeMusicPlayer");
     if(!a)return;
+    const src=String(a.currentSrc||a.src||"").trim();
+    if(!musicProbablyPlayableSrcV87110(src)){
+      handleMusicPlayerErrorV87110();
+      return;
+    }
     try{a.load()}catch{}
-    a.play().catch(err=>{
+    const p=a.play();
+    if(p&&typeof p.catch==="function")p.catch(err=>{
+      const name=String(err&&err.name||"");
+      if(name==="AbortError")return;
+      if(name==="NotSupportedError"){handleMusicPlayerErrorV87110();return}
       console.warn("music play blocked",err);
       window.__musicPlaylistErrorV51="השיר נטען. אם הוא לא התחיל לבד, לחצו על כפתור ההפעלה בנגן.";
       try{render()}catch{}
@@ -4829,7 +4873,11 @@ async function loadMusicTrackDataUrlV56(i,autoPlay=false){
         item.directUrl=payload.directUrl||payload.url;
         item.url=item.directUrl;
         item.tooLargeForDataUrl=!!payload.tooLargeForDataUrl;
-        window.__musicAudioUrl=item.directUrl;
+        if(musicProbablyPlayableSrcV87110(item.directUrl)){
+          window.__musicAudioUrl=item.directUrl;
+        }else{
+          throw new Error(payload.tooLargeForDataUrl?"music file too large for inline playback":"music file returned a non-playable Drive URL");
+        }
       }else{
         throw new Error("music file returned without playable url");
       }
@@ -4844,7 +4892,10 @@ async function loadMusicTrackDataUrlV56(i,autoPlay=false){
     if(window.__musicRequestTokenV81!==token)return "";
     console.warn("music track load failed",err);
     window.__musicTrackLoadingV56=false;
-    window.__musicPlaylistErrorV51="לא הצלחתי להשמיע את השיר הזה. אפשר לבחור שיר אחר מהרשימה.";
+    const msg=String(err&&err.message||"");
+    window.__musicPlaylistErrorV51=msg.includes("too large")||msg.includes("non-playable Drive URL")
+      ?"השיר גדול מדי להשמעה ישירה דרך הדפדפן/Drive. נסו קובץ MP3 קטן יותר או קצר יותר, או בחרו שיר אחר."
+      :"לא הצלחתי להשמיע את השיר הזה. אפשר לבחור שיר אחר מהרשימה.";
     try{render()}catch{}
     return "";
   }
@@ -4904,6 +4955,7 @@ function openMusicUrl(){
   window.__musicPlaylistErrorV51="לא נמצאה תיקיית Drive לשירים או קובץ שמע. בדקו שהקישור נשמר במסך הניהול.";
   render();
 }
+/* V87110_MUSIC_PLAYBACK_GUARD */
 /* V81_FAST_MUSIC_SELECTION_FINAL_OVERRIDE */
 
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="createBoard"){createBoard();return}if(a==="joinBoard"){joinBoard(document.getElementById("joinBoardInput")?.value);return}if(a==="copyLinks"){copyShareLinks();return}if(a==="musicTrack"){patientMusicTrackV51(b.dataset.i);return}if(a==="music"||a==="openMusic"){openMusicUrl();return}if(a==="openMusicExternal"){openMusicExternal();return}if(a==="closeMusic"){music=false;window.__musicAudioUrl="";stopPatientAudio();render();return}if(a==="stopAudio"){stopPatientAudio();return}if(a==="playNightVoice"){playFamilyVoice("night",nightText());return}if(a==="calm"){stopPatientAudio();calm=true;render();speakConfused();return}if(a==="closeCalm"){calm=false;stopPatientAudio();render();return}if(a==="speak"||a==="speakConfused"){speakConfused();return}if(a==="speakCalmVoice"){speakCalm();return}if(a==="print")print();if(a==="full"||a==="fullscreen"){await togglePatientFullscreen();return}if(a==="done"){const id=Number(b.dataset.id);data.schedule=data.schedule.map(x=>x.id===id?{...x,done:!x.done}:x);save();render()}if(a==="ackPing"){if(data.livePing){data.livePing.ack=true;save();render()}}if(a==="showDay"||a==="dayView"){await showDayFromNightFullscreenV54();return}if(a==="closeMem"){screensaver=false;markActivity();render()}})

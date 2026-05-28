@@ -1,4 +1,4 @@
-const CACHE_NAME="family-clock-v83-music-folder-recursion-fix";
+const CACHE_NAME="family-clock-v87-1-9-voice-syncfix";
 const AUDIO_CACHE_NAME="family-clock-drive-audio-runtime-v3";
 
 const CORE_FILES=[
@@ -124,10 +124,13 @@ function fixedNestedLocalUrl(url){
 
 self.addEventListener("fetch",event=>{
   const req=event.request;
+  // V84: media players, especially Safari/iOS, use Range requests. Let them pass through untouched.
+  if(req.headers && req.headers.has && req.headers.has("range"))return;
+  /* V84_RANGE_REQUEST_BYPASS */
   if(req.method!=="GET")return;
   let url;
   try{url=new URL(req.url)}catch{return}
-  if(url.protocol!=="http:"&&url.protocol!=="https:")return;
+  if(url.protocol!=="http:"&&url.protocol!=="https:")return;/* V86_IGNORE_NON_HTTP_FETCHES */
   
   const fixedNestedUrl=fixedNestedLocalUrl(url);
   if(fixedNestedUrl){
@@ -268,3 +271,13 @@ self.addEventListener("fetch",event=>{
 /* V82_MOBILE_CLOUD_SHARE_FIX_SW */
 
 /* V83_MUSIC_FOLDER_RECURSION_FIX_SW */
+
+/* V84_SCALE_SECURITY_TEMPLATE_SW */
+
+/* V85_APPS_SCRIPT_TIMEOUT_FIX_SW */
+
+/* V86_STABILITY_HARDENING_SW */
+
+/* V87_SECURITY_RELEASE_CANDIDATE_SW */
+
+/* V871_SECURITY_BLOCKERS_FIX_SW */

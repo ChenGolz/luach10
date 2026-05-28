@@ -1220,12 +1220,22 @@ function currentFamilyAccessKey(){return accessKeyFromUrlOrStorage()}
 
 
 
+
+function cleanupJsonpScriptV84(script,cbName){
+  try{ if(script && script.parentNode) script.parentNode.removeChild(script); }catch{}
+  if(cbName){
+    try{window[cbName]=function(){}}catch{}
+    setTimeout(()=>{try{delete window[cbName]}catch{}},300000);
+  }
+}
+/* V84_BOINDEX_JSONP_CLEANUP_HELPER */
+
 function installJsonpCallbackV78(name,onPayload,timeoutMs=22000,label="jsonp"){
   let settled=false;
   let timer=null;
   const softCleanup=()=>{
     try{window[name]=function(){}}catch{}
-    setTimeout(()=>{try{delete window[name]}catch{}},90000);
+    setTimeout(()=>{try{delete window[name]}catch{}},300000);
   };
   const finish=(ok,value)=>{
     if(settled)return;
@@ -1277,7 +1287,7 @@ function saveManualAccessKey(){
 }
 function missingAccessKeyNotice(){
   if(hasFamilyAccessKey())return"";
-  return `<section class="card" style="border:2px solid #f1d596;background:#fff7df;color:#4b3b18"><h2>🔐 ייתכן שחסר מפתח גישה</h2><p>אם הלוח לא נטען או לא נשמר, פתחו שוב את הקישור המקורי שקיבלתם במשפחה. אפשר גם להדביק כאן את המפתח אם הוא נשלח בנפרד.</p><input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left"><button class="btn green" onclick="saveManualAccessKey()">שמירת מפתח וטעינה מחדש</button></section>`;
+  return `<section class="card" style="border:2px solid #f1d596;background:#fff7df;color:#4b3b18"><h2>🔐 ייתכן שחסר מפתח גישה</h2><p>אם הלוח לא נטען או לא נשמר, פתחו שוב את הקישור המקורי שקיבלתם במשפחה. אפשר גם להדביק כאן את המפתח אם הוא נשלח בנפרד.</p><input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left"><button class="btn green" data-a="saveManualAccessKeyV87">שמירת מפתח וטעינה מחדש</button></section>`;
 }
 
 
@@ -1382,6 +1392,34 @@ accessKeyFromUrlOrStorage=accessKeyFromUrlOrStorageV52;
 
 
 
+
+function isAllowedAppsScriptUrlV87(value){
+  value=String(value||"").trim();
+  if(!value)return false;
+  try{
+    const u=new URL(value);
+    if(u.protocol!=="https:")return false;
+    if(u.hostname==="script.google.com" && /^\/macros\/s\/[^/]+\/exec$/.test(u.pathname))return true;
+    if(u.hostname==="script.googleusercontent.com" && u.pathname.indexOf("/macros/")>=0)return true;
+    return false;
+  }catch{return false}
+}
+function approveApiUrlFromQueryV87(value){
+  value=String(value||"").trim();
+  if(!value)return "";
+  if(!isAllowedAppsScriptUrlV87(value)){
+    alert("כתובת Apps Script בקישור לא נראית תקינה ולכן לא נשמרה.");
+    return "";
+  }
+  const key="luach_approved_api_url_v87_"+value;
+  if(sessionStorage.getItem(key)==="1")return value;
+  const ok=confirm("הקישור מנסה להגדיר כתובת ענן/Apps Script חדשה. לאשר רק אם זה קישור שאת/ה סומך/ת עליו.\n\n"+value);
+  if(!ok)return "";
+  sessionStorage.setItem(key,"1");
+  return value;
+}
+/* V87_API_URL_CONFIRMATION_GUARD */
+
 const PRIVATE_CLOUD_KEY="family_clock_private_apps_script_url_v17";
 const PRIVATE_DRIVE_KEY="family_clock_private_drive_folder_v17";
 function folderIdFromUrlGlobal(value){
@@ -1389,17 +1427,101 @@ function folderIdFromUrlGlobal(value){
   const m=value.match(/\/folders\/([a-zA-Z0-9_-]+)/);
   return m?m[1]:value;
 }
+
+const TRUSTED_API_MARKER_PREFIX="luach_trusted_api_url_v871_";
+const TRUSTED_DRIVE_MARKER_PREFIX="luach_trusted_drive_folder_v871_";
+function trustedApiMarkerKey(url){return TRUSTED_API_MARKER_PREFIX+String(url||"")}
+function markTrustedApiUrlV871(url){url=String(url||"").trim();if(url)localStorage.setItem(trustedApiMarkerKey(url),"1")}
+function clearTrustedApiUrlV871(){const saved=String(localStorage.getItem(PRIVATE_CLOUD_KEY)||"").trim();if(saved)localStorage.removeItem(trustedApiMarkerKey(saved));localStorage.removeItem(PRIVATE_CLOUD_KEY)}
+function rememberTrustedApiUrlV871(url){
+  url=String(url||"").trim();
+  if(!url)return "";
+  if(typeof isAllowedAppsScriptUrlV87==="function"&&!isAllowedAppsScriptUrlV87(url))return "";
+  localStorage.setItem(PRIVATE_CLOUD_KEY,url);
+  markTrustedApiUrlV871(url);
+  return url;
+}
+function trustSavedApiUrlOrClearV871(url){
+  url=String(url||"").trim();
+  if(!url)return "";
+  const isOwner=url===OWNER_APPS_SCRIPT_URL;
+  if(!isOwner&&typeof isAllowedAppsScriptUrlV87==="function"&&!isAllowedAppsScriptUrlV87(url))return "";
+  if(!isOwner&&localStorage.getItem(trustedApiMarkerKey(url))!=="1"){
+    const ok=confirm("נמצא חיבור ענן פרטי שנשמר מגרסה קודמת. לאשר רק אם זו כתובת Apps Script של המשפחה.\n\n"+url);
+    if(!ok)return "";
+    markTrustedApiUrlV871(url);
+  }
+  return url;
+}
+function readTrustedPrivateApiUrlV871(){
+  const saved=String(localStorage.getItem(PRIVATE_CLOUD_KEY)||"").trim();
+  const trusted=trustSavedApiUrlOrClearV871(saved);
+  if(!trusted&&saved)clearTrustedApiUrlV871();
+  return trusted;
+}
+function trustedDriveMarkerKey(folder){return TRUSTED_DRIVE_MARKER_PREFIX+String(folder||"")}
+function isAllowedDriveFolderIdV871(value){value=String(value||"").trim();return /^[A-Za-z0-9_-]{10,200}$/.test(value)}
+function rememberTrustedDriveFolderV871(folder){
+  folder=folderIdFromUrlGlobal(folder);
+  if(!folder)return "";
+  if(!isAllowedDriveFolderIdV871(folder))return "";
+  localStorage.setItem(PRIVATE_DRIVE_KEY,folder);
+  localStorage.setItem(trustedDriveMarkerKey(folder),"1");
+  return folder;
+}
+function readTrustedDriveFolderV871(){
+  const saved=String(localStorage.getItem(PRIVATE_DRIVE_KEY)||"").trim();
+  if(!saved)return "";
+  if(!isAllowedDriveFolderIdV871(saved)){
+    localStorage.removeItem(PRIVATE_DRIVE_KEY);
+    return "";
+  }
+  if(localStorage.getItem(trustedDriveMarkerKey(saved))!=="1"){
+    const ok=confirm("נמצאה תיקיית Drive פרטית שנשמרה מגרסה קודמת. לאשר רק אם זו תיקייה של המשפחה.\n\n"+saved);
+    if(!ok){
+      localStorage.removeItem(PRIVATE_DRIVE_KEY);
+      return "";
+    }
+    localStorage.setItem(trustedDriveMarkerKey(saved),"1");
+  }
+  return saved;
+}
+function approveDriveFolderFromQueryV871(value){
+  const folder=folderIdFromUrlGlobal(value);
+  if(!folder)return "";
+  if(!isAllowedDriveFolderIdV871(folder)){
+    alert("קישור תיקיית Drive בקישור לא נראה תקין ולכן לא נשמר.");
+    return "";
+  }
+  const key="luach_approved_drive_folder_v871_"+folder;
+  if(sessionStorage.getItem(key)==="1")return folder;
+  const ok=confirm("הקישור מנסה להגדיר תיקיית Drive פרטית להקלטות. לאשר רק אם זו תיקייה של המשפחה.\n\n"+folder);
+  if(!ok)return "";
+  sessionStorage.setItem(key,"1");
+  return folder;
+}
+
+
 function privateApiFromUrl(){
   const p=new URLSearchParams(location.search);
-  const api=p.get("api")||p.get("cloudUrl")||"";
-  if(api)localStorage.setItem(PRIVATE_CLOUD_KEY,api);
-  return api||localStorage.getItem(PRIVATE_CLOUD_KEY)||"";
+  const raw=p.get("api")||p.get("cloudUrl")||"";
+  if(raw){
+    const approved=approveApiUrlFromQueryV87(raw);
+    if(approved)return rememberTrustedApiUrlV871(approved);
+    return readTrustedPrivateApiUrlV871();
+  }
+  return readTrustedPrivateApiUrlV871();
 }
+/* V871_GUARDED_PRIVATE_API_FROM_URL */
+
 function privateDriveFromUrl(){
   const p=new URLSearchParams(location.search);
-  const folder=folderIdFromUrlGlobal(p.get("driveFolder")||"");
-  if(folder)localStorage.setItem(PRIVATE_DRIVE_KEY,folder);
-  return folder||localStorage.getItem(PRIVATE_DRIVE_KEY)||"";
+  const raw=p.get("driveFolder")||"";
+  if(raw){
+    const approved=approveDriveFolderFromQueryV871(raw);
+    if(approved)return rememberTrustedDriveFolderV871(approved);
+  }
+  return readTrustedDriveFolderV871();
 }
 
 const CLOUD_CONFIG_KEY="luach_cloud_config_v1";
@@ -1410,13 +1532,26 @@ const DEFAULT_CLOUD={
   boardId:"grandma-home-board",
   pollMs:OWNER_DEFAULT_POLL_MS
 };
+function sanitizeCloudConfigV871(cfg){
+  cfg={...(cfg||{})};
+  const api=String(cfg.appsScriptUrl||"").trim();
+  const isOwner=api&&api===OWNER_APPS_SCRIPT_URL;
+  if(api&&!isOwner){
+    const trusted=trustSavedApiUrlOrClearV871(api);
+    cfg.appsScriptUrl=trusted||OWNER_APPS_SCRIPT_URL||"";
+  }else if(api){
+    cfg.appsScriptUrl=api;
+  }
+  return cfg;
+}
 function cloudConfigFromUrl(){
   const params=new URLSearchParams(location.search);
-  if(!params.has("board")&&!params.has("api"))return null;
+  const approvedApi=privateApiFromUrl();
+  if(!params.has("board")&&!approvedApi)return null;
   return {
     enabled:true,
     provider:"google-sheets",
-    appsScriptUrl:params.get("api")||privateApiFromUrl()||OWNER_APPS_SCRIPT_URL||"",
+    appsScriptUrl:approvedApi||OWNER_APPS_SCRIPT_URL||"",
     boardId:params.get("board")||"grandma-home-board",
     pollMs:Number(params.get("poll")||OWNER_DEFAULT_POLL_MS||60000)
   };
@@ -1434,16 +1569,18 @@ function cleanCloudUrlKeepBoard(){
   }catch{}
 }
 function loadCloudConfig(){
-  let cfg={...DEFAULT_CLOUD};
-  try{cfg={...cfg,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"{}")}}catch{}
+  let cfg=sanitizeCloudConfigV871({...DEFAULT_CLOUD});
+  try{cfg=sanitizeCloudConfigV871({...cfg,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"{}")})}catch{cfg=sanitizeCloudConfigV871(cfg)}
   const urlCfg=cloudConfigFromUrl();
   if(urlCfg){
-    cfg={...cfg,...urlCfg};
-    localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cfg));
+    cfg=sanitizeCloudConfigV871({...cfg,...urlCfg});
+    try{localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cfg))}catch{}
     cleanCloudUrlKeepBoard()
+  }else{
+    try{localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(cfg))}catch{}
   }
   if(!cfg.appsScriptUrl&&OWNER_APPS_SCRIPT_URL)cfg.appsScriptUrl=OWNER_APPS_SCRIPT_URL;
-  cfg=recoverCloudConfigFromKnownBoardV64(cfg);
+  cfg=sanitizeCloudConfigV871(recoverCloudConfigFromKnownBoardV64(cfg));
   return cfg;
 }
 let CLOUD=loadCloudConfig();
@@ -1546,7 +1683,7 @@ function jsonpMusicFolderStatusV74(folderId=""){
     const sep=apiBase().includes("?")?"&":"?";
     let done=false;
     let timer=null;
-    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{cleanupJsonpScriptV84(script,cb);if(timer)clearTimeout(timer)};
     const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>finish(false,new Error("musicFolderStatus timeout")),16000);
     window[cb]=payload=>finish(true,payload);
@@ -1615,7 +1752,10 @@ function normalizeMusicSettingsV53(){
 }
 
 
-function save(push=true){commitAllInputsToDataV44?.();normalizeMusicSettingsV53?.();localStorage.setItem(currentStorageKey(),JSON.stringify(data));if(push)debouncePush();showStatus("נשמר מקומית - שולח לענן")}
+function markLocalBoardEditV8718(){try{localStorage.setItem("family_clock_last_local_edit_v8718_"+safeBoardId(),String(Date.now()))}catch{}}
+function recentLocalBoardEditV8718(ms=15*60*1000){try{const t=Number(localStorage.getItem("family_clock_last_local_edit_v8718_"+safeBoardId())||0);return t&&Date.now()-t<ms}catch{return false}}
+function clearLocalBoardEditV8718(){try{localStorage.removeItem("family_clock_last_local_edit_v8718_"+safeBoardId())}catch{}}
+function save(push=true){commitAllInputsToDataV44?.();normalizeMusicSettingsV53?.();markLocalBoardEditV8718?.();localStorage.setItem(currentStorageKey(),JSON.stringify(data));if(push)debouncePush();showStatus("נשמר מקומית - שולח לענן")}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 function today(){return new Date().toISOString().slice(0,10)}
 function two(n){return String(n).padStart(2,"0")}
@@ -1669,6 +1809,7 @@ function normalizeBoardId(id){
 
 
 function safeBoardId(){return normalizeBoardId(CLOUD.boardId||"grandma-home-board")}
+/* V8714_JSONP_LOAD_TIMEOUT_RUNTIME_FIX: Apps Script cold starts can exceed the old 8.5s JSONP timeout. */
 function jsonpLoad(){
   return new Promise((resolve,reject)=>{
     if(!cloudOn())return resolve(null);
@@ -1678,8 +1819,7 @@ function jsonpLoad(){
     let settled=false;
     let timer=null;
     const cleanup=()=>{
-      try{delete window[cb]}catch{}
-      try{script.remove()}catch{}
+      cleanupJsonpScriptV84(script,cb);
       if(timer)clearTimeout(timer);
     };
     const done=(ok,value)=>{
@@ -1688,10 +1828,10 @@ function jsonpLoad(){
       cleanup();
       ok?resolve(value):reject(value);
     };
-    timer=setTimeout(()=>done(false,new Error("jsonp timeout")),8500);
+    timer=setTimeout(()=>done(false,new Error("jsonp timeout")),45000);
     window[cb]=(payload)=>done(true,payload);
     script.onerror=()=>done(false,new Error("jsonp failed"));
-    script.onload=()=>setTimeout(()=>done(false,new Error("jsonp callback missing")),80);
+    script.onload=()=>setTimeout(()=>done(false,new Error("jsonp callback missing")),120);
     const qp=new URLSearchParams();
     qp.set("action","load");
     qp.set("board",safeBoardId());
@@ -1779,6 +1919,13 @@ function boMaybeReleaseEditing(){
   document.body.classList.remove("is-editing");
 }
 function boClearUnsaved(){
+  try{
+    const pending=(typeof getCloudPendingSaveV62==="function")?getCloudPendingSaveV62():null;
+    if(pending&&pending.json&&Date.now()-Number(pending.at||0)<15*60*1000){
+      document.body.classList.add("has-unsaved");
+      return;
+    }
+  }catch{}
   __boUnsaved=false;
   __boUserEditing=false;
   boClearDraft();
@@ -1909,6 +2056,11 @@ async function pullCloud(){if(typeof boShouldPauseCloudRefresh==="function"&&boS
   }
   
   if(s!==cloudLast){
+    if((typeof recentLocalBoardEditV8718==="function"&&recentLocalBoardEditV8718()) || __boUnsaved || __boUserEditing){
+      markCloudSync(true);
+      showStatus("נשמר מקומית - לא דורס עריכה חדשה מהענן");
+      return;
+    }
     markCloudSync(true);
     try{showStatus("עודכן מהענן")}catch{}
     cloudLast=s;
@@ -2415,7 +2567,9 @@ function onboardingHtml(mode="patient"){
 function sendHeartbeat(){
   if(!data.settings?.heartbeatEnabled)return;
   data.heartbeat={lastSeen:Date.now(),online:navigator.onLine,page:location.pathname,userAgent:navigator.userAgent};
-  save(true);
+  try{localStorage.setItem(currentStorageKey(),JSON.stringify(data))}catch{}
+  // Do not autosave the whole board from heartbeat. It could race with real edits
+  // and make fields appear to disappear when cloud polling returns older data.
 }
 setTimeout(sendHeartbeat,3000);
 setInterval(sendHeartbeat,5*60*1000);
@@ -3005,6 +3159,84 @@ function normalizeOwnerVoiceStorageV71(){
   if(!data.voiceStorage.maxSeconds)data.voiceStorage.maxSeconds=45;
 }
 
+
+function cloneTemplateHelpV84(){
+  return `<section class="section card">
+    <div class="title"><div class="icon">🧬</div><div><h2>שיתוף עם חברים - עותק פרטי לכל משפחה</h2><p>הדרך הבטוחה ביותר לשתף את המערכת בלי לערבב מידע בין משפחות.</p></div></div>
+    <div class="notice">
+      מומלץ לשלוח לחברים קישור <strong>/copy</strong> של Google Sheet נקי. כל משפחה לוחצת “Make a copy”, מקבלת גיליון ו-Apps Script משלה, ומפעילה Web App פרטי בחשבון שלה.
+    </div>
+    <ol class="medium" style="line-height:1.55">
+      <li>לנקות מהגיליון שלך כל מידע אישי ודוגמאות רגישות.</li>
+      <li>לשתף את הגיליון הנקי כצפייה בלבד: Anyone with the link can view.</li>
+      <li>להחליף בסוף כתובת הגיליון את <code>/edit#gid=0</code> ל-<code>/copy</code>.</li>
+      <li>החברים יוצרים עותק, נכנסים ל-Extensions → Apps Script, ועושים Deploy חדש.</li>
+      <li>בהגדרות Deployment: Execute as Me, Who has access Anyone.</li>
+      <li>הם מעתיקים את Web App URL שלהם ומדביקים במערכת שלהם. כך הנתונים וה-Drive שלהם נשארים מופרדים לגמרי.</li>
+    </ol>
+    <div class="actions">
+      <button class="btn green" data-a="copyCloneInstructionsV84">העתקת הוראות לחברים</button>
+      <button class="btn soft" data-a="templateSetupInfoV84">בדיקת קישור /copy של הגיליון הזה</button>
+    </div>
+  </section>`;
+}
+async function copyCloneInstructionsV84(){
+  const text=`התקנת השעון המשפחתי כעותק פרטי:
+1. פתחו את קישור התבנית שקיבלתם ולחצו Make a copy.
+2. בגיליון החדש: Extensions → Apps Script.
+3. Deploy → New deployment → Web app.
+4. Execute as: Me.
+5. Who has access: Anyone.
+6. Deploy, לאשר הרשאות, ולהעתיק את Web App URL.
+7. לפתוח את אתר השעון ולהדביק את כתובת ה-Web App שלכם.
+כך הנתונים נשמרים רק בחשבון Google שלכם.`;
+  await copyText(text);
+  showToast?.("הוראות לחברים הועתקו ✅","ok");
+}
+function jsonpTemplateSetupInfoV84(adminSecret){
+  return new Promise((resolve,reject)=>{
+    if(!cloudOn())return reject(new Error("אין כתובת Apps Script"));
+    const cb="luach_template_info_v84_"+Date.now()+"_"+Math.floor(Math.random()*999999);
+    const script=document.createElement("script");
+    const sep=apiBase().includes("?")?"&":"?";
+    let done=false;
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},300000);try{script.remove()}catch{}};
+    const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
+    const timer=setTimeout(()=>finish(false,new Error("timeout")),15000);
+    window[cb]=payload=>{clearTimeout(timer);finish(true,payload)};
+    script.onerror=()=>{clearTimeout(timer);finish(false,new Error("jsonp failed"))};
+    const qp=new URLSearchParams();
+    qp.set("action","templateSetupInfo");
+    qp.set("callback",cb);
+    qp.set("t",String(Date.now()));
+    if(adminSecret)qp.set("adminSecret",adminSecret);
+    script.src=`${apiBase()}${sep}${qp.toString()}`;
+    document.head.appendChild(script);
+  });
+}
+async function showTemplateSetupInfoV84(){
+  try{
+    const adminSecret=String(prompt("הזיני MIGRATION_ADMIN_SECRET כדי לקבל קישור /copy מאובטח:","")||"").trim();
+    if(!adminSecret)return;
+    const info=await jsonpTemplateSetupInfoV84(adminSecret);
+    if(info&&info.ok&&info.copyUrl){
+      await copyText(info.copyUrl);
+      alert("קישור /copy של הגיליון הועתק:\\n"+info.copyUrl+"\\n\\nלפני שליחה, ודאו שהגיליון נקי ממידע אישי ומשותף לצפייה בלבד.");
+    }else{
+      alert("לא הצלחתי לקבל קישור /copy. אפשר ליצור ידנית: לפתוח את כתובת הגיליון ולהחליף /edit#gid=0 ב-/copy.");
+    }
+  }catch(err){
+    alert("לא הצלחתי לבדוק דרך Apps Script. אפשר ליצור ידנית: לפתוח את כתובת הגיליון ולהחליף /edit#gid=0 ב-/copy.");
+  }
+}
+/* V84_CLONE_TEMPLATE_UI */
+
+
+function publicMediaPrivacyNoteV87(){
+  return `<div class="notice" style="background:#fff7df;border-color:#f1d596;color:#4b3b18"><strong>פרטיות הקלטות ושירים:</strong> כדי שהשמעה תעבוד טוב בטאבלט, קבצי מדיה ב-Drive עשויים להיות משותפים כ-“Anyone with the link”. לא מומלץ להעלות הקלטות רגישות במיוחד. להפרדה מלאה בין משפחות, עדיף שכל משפחה תשתמש בעותק פרטי משלה או בתיקיית Drive משלה.</div>`;
+}
+/* V87_PUBLIC_MEDIA_PRIVACY_NOTE */
+
 function privacySharingNoteV79(){
   return `<div class="notice privacyNoteV79"><strong>שיתוף עם משפחות אחרות:</strong> כל לוח מקבל מזהה ומפתח משלו. קישור דרייב ברירת-המחדל מוסתר מהמשתמשים, והקלטות חדשות נשמרות בתת-תיקייה נפרדת לכל לוח. למשפחה שמעדיפה הפרדה מלאה אפשר להגדיר תיקיית Drive פרטית משלה בטאב קול משפחתי.</div>`;
 }
@@ -3086,7 +3318,7 @@ function voice(){
       <h2>קול משפחתי</h2>
       <p>הקלטות קצרות בקול מוכר, כדי להרגיע ולחזק ברגעים חשובים.</p>
     </div>
-    ${privacySharingNoteV79()}${voiceDriveBoxV71()}
+    ${privacySharingNoteV79()}${publicMediaPrivacyNoteV87()}${voiceDriveBoxV71()}
     <div class="notice">אם שומעים הקלטה רק במחשב הזה ולא במכשיר אחר, היא עדיין לא עלתה ל-Drive. בדקו Deploy חדש והרשאות Drive.</div>
     <div class="voiceGrid">${cards}</div>
     <div class="actions">
@@ -3499,7 +3731,7 @@ function jsonpAudioMetaV57(key){
     const sep=apiBase().includes("?")?"&":"?";
     let done=false;
     let timer=null;
-    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{cleanupJsonpScriptV84(script,cb);if(timer)clearTimeout(timer)};
     const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>finish(false,new Error("audio meta timeout")),12000);
     window[cb]=payload=>finish(true,payload);
@@ -3559,8 +3791,20 @@ async function refreshVoiceDriveRefV46(key){
     data.voiceRecordings=data.voiceRecordings||{};
     data.voiceRecordings[key]="drive:"+meta.fileId;
     data.voiceDriveRefs=data.voiceDriveRefs||{};
-    data.voiceDriveRefs[key]={fileId:meta.fileId,folderId:meta.folderId||"",folderName:meta.folderName||"",updatedAt:meta.updated_at||""};
-    save(false);
+    data.voiceDriveRefs[key]={fileId:meta.fileId,folderId:meta.folderId||"",folderName:meta.folderName||"",directUrl:meta.directUrl||"",updatedAt:meta.updated_at||""};
+
+    // V8719_VOICE_SYNCFIX: after Drive confirms the recording, persist the
+    // small drive: marker to the cloud board too. This lets already-open
+    // patient pages discover the recording even before their next backend
+    // audio-ref attachment refresh.
+    try{localStorage.setItem(currentStorageKey(),JSON.stringify(data))}catch{}
+    try{
+      if(typeof pushCloud==="function")await pushCloud({silent:true,force:true});
+      if(typeof clearLocalBoardEditV8718==="function")clearLocalBoardEditV8718();
+    }catch(err){
+      console.warn("voice Drive marker cloud save failed",err);
+      try{save(false)}catch{}
+    }
     return true;
   }
   return false;
@@ -3681,7 +3925,7 @@ function jsonpTestAudioWriteV73(folderId=""){
     const sep=apiBase().includes("?")?"&":"?";
     let done=false;
     let timer=null;
-    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{cleanupJsonpScriptV84(script,cb);if(timer)clearTimeout(timer)};
     const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>finish(false,new Error("testAudioWrite timeout")),15000);
     window[cb]=payload=>finish(true,payload);
@@ -3723,7 +3967,7 @@ function jsonpAudioFolderStatusV72(folderId=""){
     const sep=apiBase().includes("?")?"&":"?";
     let done=false;
     let timer=null;
-    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{cleanupJsonpScriptV84(script,cb);if(timer)clearTimeout(timer)};
     const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>finish(false,new Error("audio folder status timeout")),12000);
     window[cb]=payload=>finish(true,payload);
@@ -3774,15 +4018,22 @@ function savePrivateCloud(){
   const api=(document.getElementById("privateApiBo")?.value||"").trim();
   const drive=folderIdFromUrlGlobal((document.getElementById("privateDriveBo")?.value||"").trim());
   if(!api)return alert("צריך להדביק Web App URL של Apps Script. תיקיית Drive היא אופציונלית.");
-  localStorage.setItem(PRIVATE_CLOUD_KEY,api);
-  if(drive)localStorage.setItem(PRIVATE_DRIVE_KEY,drive);
+  if(typeof isAllowedAppsScriptUrlV87==="function" && !isAllowedAppsScriptUrlV87(api))return alert("כתובת Apps Script לא תקינה. צריך Web App URL שמתחיל ב-https://script.google.com/macros/s/.../exec");
+  rememberTrustedApiUrlV871(api);
+  if(drive){
+    if(!isAllowedDriveFolderIdV871(drive))return alert("Folder ID של Drive לא תקין.");
+    rememberTrustedDriveFolderV871(drive);
+  }
   CLOUD.appsScriptUrl=api;
   CLOUD.enabled=true;
   saveCloudConfig();
   data.voiceStorage=data.voiceStorage||{mode:"family",folderId:"",maxSeconds:45};
   if(drive){data.voiceStorage.mode="family";data.voiceStorage.folderId=drive;save()}
-  showToast?.("החיבור הפרטי נשמר ✅","ok");
+  showToast?.("החיבור הפרטי נשמר במכשיר הזה ✅","ok");
+  render();
 }
+/* V871_VALIDATED_PRIVATE_CLOUD_SETUP_BOINDEX */
+
 async function copyPrivateCloudLinks(){
   savePrivateCloud();
   const api=privateApiFromUrl()||CLOUD.appsScriptUrl||"";
@@ -3952,24 +4203,28 @@ pushCloud=async function(options={}){
 
   if(!silent)try{setSavingButtons(true,"⏳ שומר לענן...")}catch{}
   const body={action:"save",boardId:safeBoardId(),value,...accessKeyPayload()};
+  let postError=null;
   try{
-    await fetch(apiBase(),{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(body)
-    });
+    // V8717_FORM_POST_PRIMARY: use the hidden form POST as the primary save path.
+    // Apps Script web apps often redirect no-cors fetch() through googleusercontent,
+    // which can create scary Chrome console/CORB noise even when the save worked.
+    // The form POST avoids the fetch redirect error; the real success signal remains
+    // the follow-up cloud read confirmation below.
+    if(typeof postToAppsScriptTextPlainV57==="function"){
+      await postToAppsScriptTextPlainV57({...body,__timeoutMs:45000});
+    }else{
+      await postToAppsScript(body);
+    }
   }catch(err){
-    markCloudSync(false);
-    document.body.classList.add("has-unsaved");
-    if(!silent)try{setSavingButtons(false,"⚠️ נשמר רק במחשב הזה")}catch{}
-    throw err;
+    postError=err;
+    console.warn("cloud form POST reported failure; verifying before marking failed",err);
   }
 
-  const confirmed=await waitForCloudSaveConfirmV82(expected,silent?14000:30000);
+  const confirmed=await waitForCloudSaveConfirmV82(expected,silent?22000:45000);
   if(confirmed.ok){
     cloudLast=expected;
     clearCloudPendingSaveV62?.();
+    clearLocalBoardEditV8718?.();
     __pendingCloudSaveJsonV58="";
     __pendingCloudSaveAtV58=0;
     markCloudSync(true);
@@ -3982,7 +4237,8 @@ pushCloud=async function(options={}){
   markCloudSync(false);
   document.body.classList.add("has-unsaved");
   if(!silent)try{setSavingButtons(false,"⚠️ נשמר מקומית בלבד")}catch{}
-  throw new Error("נשמר בדפדפן הזה, אבל לא התקבל אישור מהענן. "+(confirmed.error||""));
+  const failMsg=confirmed.error||(postError&&(postError.message||String(postError)))||"cloud confirmation failed";
+  throw new Error("נשמר בדפדפן הזה, אבל לא התקבל אישור מהענן. "+failMsg);
 };
 /* V82_VERIFIED_MOBILE_CLOUD_SAVE */
 
@@ -4207,14 +4463,20 @@ function notifyParentRoute(tabName){
 
 
 
-const __showStatusBeforeQuietV79=showStatus;
 function showStatus(msg){
   msg=String(msg||"");
   const quiet=["נשלח לשמירה","נשמר מקומית","ממתין לאישור","עודכן מהענן","שגרת היום נשלחה לשמירה"];
   if(quiet.some(x=>msg.includes(x)))return;
-  return __showStatusBeforeQuietV79(msg);
+  try{showToast(msg||"עודכן","ok")}catch{}
+  const el=document.getElementById("status");
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(showStatus.t);
+  showStatus.t=setTimeout(()=>el.classList.remove("show"),1400);
 }
 /* V79_QUIET_BACKOFFICE_SAVE_STATUS */
+/* V8715_SHOWSTATUS_RECURSION_FIX */
 
 function setSavingButtons(active,label){
   const buttons=[...document.querySelectorAll('[data-a="saveAll"],[data-a="saveInputs"]')];
@@ -4271,6 +4533,204 @@ document.addEventListener("change",e=>{
   }
 },true);
 
+
+
+
+/* V86_REMOVED_BOINDEX_DOM_SCRUBBER */
+
+
+
+
+
+
+function sanitizeImportedBoardV871(value){
+  value=value&&typeof value==="object"?value:{};
+  // Preserve every known top-level board field exported by this app version.
+  // Unknown fields are still ignored so importing a JSON file cannot inject arbitrary app state.
+  const allowed=[
+    // Current core data model
+    "view","stage","settings","livePing","voiceRecordings","voiceDriveRefs","voiceStorage",
+    "person","schedule","medications","contacts","family","care","symptoms","monthly","safety",
+    // Compatibility / older or optional sections
+    "profile","routine","events","music","emergency","anchorBook","kids","caregivers",
+    "weather","boardCreatedAt","adminMessages","memories","notes"
+  ];
+  const out={};
+  allowed.forEach(k=>{if(Object.prototype.hasOwnProperty.call(value,k))out[k]=value[k]});
+  return out;
+}
+/* V8713_IMPORT_PRESERVE_CURRENT_MODEL */
+
+function exportJson(){
+  try{
+    commitAllInputsToDataV44?.();
+    try{commitDomToData?.()}catch{}
+    const payload={
+      exported_at:new Date().toISOString(),
+      boardId:safeBoardId(),
+      version:"v87.1.8-local-edit-guard",
+      value:data
+    };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=(safeBoardId()||"family-clock")+"-backup.json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{try{URL.revokeObjectURL(url);a.remove()}catch{}},1000);
+    showToast?.("קובץ גיבוי ירד למחשב ✅","ok");
+  }catch(err){
+    alert("לא הצלחתי לייצא גיבוי: "+(err&&err.message?err.message:err));
+  }
+}
+function importJson(){
+  const input=document.createElement("input");
+  input.type="file";
+  input.accept="application/json,.json";
+  input.onchange=()=>{
+    const file=input.files&&input.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const parsed=JSON.parse(String(reader.result||"{}"));
+        const rawValue=parsed.value||parsed.data||parsed;
+        if(!rawValue||typeof rawValue!=="object")throw new Error("קובץ לא תקין");
+        const value=sanitizeImportedBoardV871(rawValue);
+        if(!confirm("לייבא את הגיבוי ולדרוס את הנתונים במסך הניהול הנוכחי?"))return;
+        data=deepMerge(DEFAULT,value);
+        data.boardCreatedAt=data.boardCreatedAt||new Date().toISOString();
+        save(false);
+        render();
+        showToast?.("הגיבוי יובא. מומלץ ללחוץ שמירה לענן ✅","ok");
+      }catch(err){
+        alert("לא הצלחתי לייבא קובץ: "+(err&&err.message?err.message:err));
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+/* V87_EXPORT_IMPORT_FUNCTIONS */
+
+async function verifyAccessKeyWorksV87(key){
+  key=String(key||"").trim();
+  if(!key)throw new Error("missing key");
+  const oldSet=typeof setFamilyAccessKeyV52==="function"?currentFamilyAccessKey():"";
+  try{
+    if(typeof setFamilyAccessKeyV52==="function")setFamilyAccessKeyV52(key);
+    else localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,key);
+    const payload=await jsonpLoad();
+    if(!payload||payload.ok===false)throw new Error((payload&&payload.error)||"load rejected");
+    return true;
+  }finally{
+    if(typeof setFamilyAccessKeyV52==="function" && oldSet) setFamilyAccessKeyV52(oldSet);
+  }
+}
+
+async function rotateAccessKey(){
+  const oldKey=currentFamilyAccessKey();
+  if(!oldKey)return alert("אין מפתח קיים לסיבוב.");
+  if(!confirm("להחליף מפתח גישה? הקישורים הישנים יפסיקו לעבוד אחרי אישור הענן."))return;
+
+  const newKey=randomFamilyAccessKey();
+  const oldLocal=oldKey;
+  try{
+    showStatus?.("מבקשת להחליף מפתח בענן...");
+    await postToAppsScript({
+      action:"rotateAccessKey",
+      boardId:safeBoardId(),
+      oldAccessKey:oldKey,
+      newAccessKey:newKey
+    });
+
+    // The iframe/no-cors post cannot prove success, so verify by loading with the new key.
+    showStatus?.("מאמתת שהמפתח החדש עובד...");
+    if(typeof setFamilyAccessKeyV52==="function")setFamilyAccessKeyV52(newKey);
+    else localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,newKey);
+
+    const confirmPayload=await jsonpLoad();
+    if(!confirmPayload || confirmPayload.ok===false || confirmPayload.error){
+      if(typeof setFamilyAccessKeyV52==="function")setFamilyAccessKeyV52(oldLocal);
+      else localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,oldLocal);
+      throw new Error((confirmPayload&&confirmPayload.error)||"המפתח החדש לא אומת מול הענן");
+    }
+
+    showToast?.("מפתח הגישה הוחלף ואומת בענן ✅","ok");
+    render();
+  }catch(err){
+    try{
+      if(typeof setFamilyAccessKeyV52==="function")setFamilyAccessKeyV52(oldLocal);
+      else localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,oldLocal);
+    }catch{}
+    alert("לא החלפתי את המפתח המקומי כי לא התקבל אישור מהענן. המפתח הישן נשמר. פרטים: "+(err&&err.message?err.message:err));
+  }
+}
+/* V87_CONFIRMED_ACCESS_KEY_ROTATION */
+
+
+function jsonpVerifyAccessKeyV871(key){
+  return new Promise((resolve,reject)=>{
+    if(!cloudOn())return reject(new Error("אין חיבור לענן"));
+    const cb="luach_verify_key_v871_"+Date.now()+"_"+Math.floor(Math.random()*999999);
+    const script=document.createElement("script");
+    const sep=apiBase().includes("?")?"&":"?";
+    let done=false;
+    let timer=null;
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},300000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const finish=(ok,value)=>{if(done)return;done=true;cleanup();ok?resolve(value):reject(value)};
+    timer=setTimeout(()=>finish(false,new Error("verifyAccessKey timeout")),16000);
+    window[cb]=payload=>finish(true,payload);
+    script.onerror=()=>finish(false,new Error("verifyAccessKey jsonp failed"));
+    const qp=new URLSearchParams();
+    qp.set("action","verifyAccessKey");
+    qp.set("board",safeBoardId());
+    qp.set("accessKey",String(key||""));
+    qp.set("callback",cb);
+    qp.set("t",String(Date.now()));
+    script.src=`${apiBase()}${sep}${qp.toString()}`;
+    document.head.appendChild(script);
+  });
+}
+
+async function rotateAccessKey(){
+  const oldKey=currentFamilyAccessKey();
+  if(!oldKey)return alert("אין מפתח קיים לסיבוב.");
+  if(!confirm("להחליף מפתח גישה? הקישורים הישנים יפסיקו לעבוד אחרי אישור הענן."))return;
+
+  const oldCheck=await jsonpVerifyAccessKeyV871(oldKey).catch(err=>({ok:false,secured:false,error:err.message||String(err)}));
+  if(!oldCheck || !oldCheck.ok || oldCheck.secured!==true){
+    return alert("אי אפשר להחליף מפתח כרגע: הלוח לא מאומת כמאובטח בענן. פתחו את הקישור המקורי עם המפתח או צרו לוח חדש/מיגרציה מסודרת.");
+  }
+
+  const newKey=randomFamilyAccessKey();
+  try{
+    showStatus?.("מבקשת להחליף מפתח בענן...");
+    await postToAppsScript({
+      action:"rotateAccessKey",
+      boardId:safeBoardId(),
+      oldAccessKey:oldKey,
+      newAccessKey:newKey
+    });
+
+    showStatus?.("מאמתת שהמפתח החדש נשמר...");
+    const newCheck=await jsonpVerifyAccessKeyV871(newKey);
+    if(!newCheck || !newCheck.ok || newCheck.secured!==true)throw new Error((newCheck&&newCheck.error)||"המפתח החדש לא אומת");
+
+    const oldAfter=await jsonpVerifyAccessKeyV871(oldKey).catch(()=>({ok:false,secured:true}));
+    if(oldAfter && oldAfter.ok===true)throw new Error("המפתח הישן עדיין פעיל, לכן הסיבוב לא אושר");
+
+    if(typeof setFamilyAccessKeyV52==="function")setFamilyAccessKeyV52(newKey);
+    else localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,newKey);
+
+    showToast?.("מפתח הגישה הוחלף ואומת בענן ✅","ok");
+    render();
+  }catch(err){
+    alert("המפתח לא הוחלף מקומית כי לא התקבל אישור מלא מהענן. המפתח הישן נשמר. פרטים: "+(err&&err.message?err.message:err));
+  }
+}
+/* V871_VERIFY_ACCESS_KEY_ROTATION_FINAL */
 
 
 document.addEventListener("click",e=>{
@@ -4355,7 +4815,7 @@ async function sendPing(){
   render();
 }
 
-document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="tab"||a==="setTab"||a==="openTab"){commitAllInputsToDataV44?.();save(false)}if(a==="hardRefreshApp"){hardRefreshApp();return}if(a==="copyPatientLink"){copyBoardLink("patient");return}if(a==="copyAdminLink"){copyBoardLink("admin");return}if(a==="copyVoicePrompt"){copyVoicePrompt(b.dataset.key);return}if(a==="copyAccessKey"){copyAccessKey();return}if(a==="showAccessKey"){showAccessKey();return}if(a==="rotateAccessKey"){rotateAccessKey();return}if(a==="toggleAdminTheme"){toggleAdminTheme();return}if(a==="savePrivateCloud"){savePrivateCloud();return}if(a==="copyPrivateCloudLinks"){copyPrivateCloudLinks();return}if(a==="sendFamilyWhatsapp"){sendFamilyWhatsapp();return}if(a==="stopPlayback"){stopManagedAudio();return}if(a==="openVoiceFolder"){openVoiceFolder();return}if(a==="sendWhatsappInvite"){sendWhatsappInvite();return}if(a==="clearPhoto"){const box=b.closest(".photoTools");if(box){box.querySelector('input[type="hidden"][data-f="photo"]').value="";box.querySelector("[data-photo-preview]").textContent="תמונה";}return}if(a==="createBoard"){createBoard();return}if(a==="joinBoard"){joinBoard(document.getElementById("joinBoardInput")?.value);return}if(a==="copyPatientLinkV82"){copyPatientShareLinkV82();return}if(a==="copyBackofficeLinkV82"){copyBackofficeShareLinkV82();return}if(a==="verifyMobileCloudSaveV82"){verifyMobileCloudSaveV82();return}if(a==="copyLinks"){copyShareLinks();return}if(a==="setWeatherCity"){setWeatherCity();return}if(a==="updateWeatherFromProfile"){updateWeatherFromProfile();return}if(a==="tab"){try{commitDomToData();save(false);boClearUnsaved?.();pushCloud({silent:true}).catch(()=>{})}catch{}stopManagedAudio();tab=b.dataset.tab;try{const u=new URL(location.href);u.searchParams.set("tab",tab);history.replaceState(null,"",u.toString());notifyParentRoute(tab)}catch{}render();return}if(a==="goVoice"){tab="voice";try{const u=new URL(location.href);u.searchParams.set("tab","voice");history.replaceState(null,"",u.toString());notifyParentRoute("voice")}catch{}render();return}if(a==="startVoice"){startVoice(b.dataset.key);return}if(a==="stopVoice"){stopVoice(b.dataset.key);return}if(a==="testMusicFolderV74"){testMusicFolderV74();return}if(a==="audioFolderStatusV72"){showAudioFolderStatusV72();return}if(a==="testAudioWriteV73"){testAudioWriteV73();return}if(a==="playVoice"){playVoice(b.dataset.key);return}if(a==="retryVoiceUpload"){retryUploadLocalVoiceV62(b.dataset.key);return}if(a==="deleteVoice"){deleteVoice(b.dataset.key);return}if(a==="saveInputs"||a==="saveAll"){saveInputs();return}if(a==="saveRow")saveRow(b.dataset.type,b.dataset.id);if(a==="addRow")addRow(b.dataset.type);if(a==="delRow")delRow(b.dataset.type,b.dataset.id);if(a==="toggleCare"){data.care[b.dataset.k]=!data.care[b.dataset.k];data.care.date=today();save();render()}if(a==="export")exportJson();if(a==="import")importJson();if(a==="sendPing")sendPing();if(a==="quickPing"){tab="live";render();setTimeout(()=>{const el=document.getElementById("pingText");el?.scrollIntoView({behavior:"smooth",block:"center"});el?.focus();el?.classList.add("quickJumpPulse");setTimeout(()=>el?.classList.remove("quickJumpPulse"),1800)},80);return}if(a==="clearPing"){data.livePing=null;save(false);clearPingCloud?.().catch(()=>pushCloud({silent:true}).catch(()=>{}));render()}if(a==="testHebrewTts"){testHebrewTts();return}if(a==="testChime"){unlockAudio();chime("soft")}if(a==="printSigns"){printCleanSigns();return}if(a==="printBook"){commitDomToData?.();save(false);printCleanBook();return}if(a==="testCloud"){try{await pushCloud();await pullCloud();alert("החיבור לגוגל שיט עובד ✅")}catch(err){alert("לא הצליח להתחבר לגוגל שיט. בדקי את OWNER_APPS_SCRIPT_URL ואת הרשאות ה-Web App.")}}if(a==="full"){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}});
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="tab"||a==="setTab"||a==="openTab"){commitAllInputsToDataV44?.();save(false)}if(a==="hardRefreshApp"){hardRefreshApp();return}if(a==="copyPatientLink"){copyBoardLink("patient");return}if(a==="copyAdminLink"){copyBoardLink("admin");return}if(a==="copyVoicePrompt"){copyVoicePrompt(b.dataset.key);return}if(a==="copyAccessKey"){copyAccessKey();return}if(a==="showAccessKey"){showAccessKey();return}if(a==="rotateAccessKey"){rotateAccessKey();return}if(a==="toggleAdminTheme"){toggleAdminTheme();return}if(a==="savePrivateCloud"){savePrivateCloud();return}if(a==="copyPrivateCloudLinks"){copyPrivateCloudLinks();return}if(a==="sendFamilyWhatsapp"){sendFamilyWhatsapp();return}if(a==="stopPlayback"){stopManagedAudio();return}if(a==="openVoiceFolder"){openVoiceFolder();return}if(a==="sendWhatsappInvite"){sendWhatsappInvite();return}if(a==="clearPhoto"){const box=b.closest(".photoTools");if(box){box.querySelector('input[type="hidden"][data-f="photo"]').value="";box.querySelector("[data-photo-preview]").textContent="תמונה";}return}if(a==="createBoard"){createBoard();return}if(a==="joinBoard"){joinBoard(document.getElementById("joinBoardInput")?.value);return}if(a==="copyPatientLinkV82"){copyPatientShareLinkV82();return}if(a==="copyBackofficeLinkV82"){copyBackofficeShareLinkV82();return}if(a==="verifyMobileCloudSaveV82"){verifyMobileCloudSaveV82();return}if(a==="copyLinks"){copyShareLinks();return}if(a==="setWeatherCity"){setWeatherCity();return}if(a==="updateWeatherFromProfile"){updateWeatherFromProfile();return}if(a==="tab"){try{commitDomToData();save(false);pushCloud({silent:true}).then(()=>{boClearUnsaved?.()}).catch(()=>{document.body.classList.add("has-unsaved");showStatus("נשמר מקומית - ממתין לאישור ענן")})}catch{}stopManagedAudio();tab=b.dataset.tab;try{const u=new URL(location.href);u.searchParams.set("tab",tab);history.replaceState(null,"",u.toString());notifyParentRoute(tab)}catch{}render();return}if(a==="goVoice"){tab="voice";try{const u=new URL(location.href);u.searchParams.set("tab","voice");history.replaceState(null,"",u.toString());notifyParentRoute("voice")}catch{}render();return}if(a==="startVoice"){startVoice(b.dataset.key);return}if(a==="stopVoice"){stopVoice(b.dataset.key);return}if(a==="copyCloneInstructionsV84"){copyCloneInstructionsV84();return}if(a==="templateSetupInfoV84"){showTemplateSetupInfoV84();return}if(a==="testMusicFolderV74"){testMusicFolderV74();return}if(a==="audioFolderStatusV72"){showAudioFolderStatusV72();return}if(a==="testAudioWriteV73"){testAudioWriteV73();return}if(a==="playVoice"){playVoice(b.dataset.key);return}if(a==="retryVoiceUpload"){retryUploadLocalVoiceV62(b.dataset.key);return}if(a==="deleteVoice"){deleteVoice(b.dataset.key);return}if(a==="saveInputs"||a==="saveAll"){saveInputs();return}if(a==="saveRow")saveRow(b.dataset.type,b.dataset.id);if(a==="addRow")addRow(b.dataset.type);if(a==="delRow")delRow(b.dataset.type,b.dataset.id);if(a==="toggleCare"){data.care[b.dataset.k]=!data.care[b.dataset.k];data.care.date=today();save();render()}if(a==="export")exportJson();if(a==="import")importJson();if(a==="sendPing")sendPing();if(a==="quickPing"){tab="live";render();setTimeout(()=>{const el=document.getElementById("pingText");el?.scrollIntoView({behavior:"smooth",block:"center"});el?.focus();el?.classList.add("quickJumpPulse");setTimeout(()=>el?.classList.remove("quickJumpPulse"),1800)},80);return}if(a==="clearPing"){data.livePing=null;save(false);clearPingCloud?.().catch(()=>pushCloud({silent:true}).catch(()=>{}));render()}if(a==="testHebrewTts"){testHebrewTts();return}if(a==="testChime"){unlockAudio();chime("soft")}if(a==="printSigns"){printCleanSigns();return}if(a==="printBook"){commitDomToData?.();save(false);printCleanBook();return}if(a==="testCloud"){try{await pushCloud();await pullCloud();alert("החיבור לגוגל שיט עובד ✅")}catch(err){alert("לא הצליח להתחבר לגוגל שיט. בדקי את OWNER_APPS_SCRIPT_URL ואת הרשאות ה-Web App.")}}if(a==="full"){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}});
 setInterval(()=>{if(isOnboardingScreen())return;now=new Date();},1000);
 const __backofficeRenderBase=render;
 render=function(){
@@ -4594,4 +5054,25 @@ if("serviceWorker" in navigator){
 /* V82_MOBILE_LINK_NOTE_IN_ACCESS_MANAGER */
 
 /* V82_MOBILE_CLOUD_SHARE_FIX_BOINDEX */
+
+/* V84_SCALE_SECURITY_TEMPLATE_BOINDEX */
+
+/* V86_STABILITY_HARDENING_BOINDEX */
+
+/* V87_API_URL_GUARD_BOINDEX */
+
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-a='saveManualAccessKeyV87']");
+  if(!b)return;
+  e.preventDefault();
+  if(typeof saveManualAccessKey==="function")saveManualAccessKey();
+});
+/* V87_MANUAL_ACCESS_KEY_HANDLER */
+
+
+/* V87_SECURITY_RELEASE_CANDIDATE_BOINDEX */
+
+/* V871_SECURITY_BLOCKERS_FIX_BOINDEX */
+/* V8718_LOCAL_EDIT_GUARD_NO_PREMATURE_CLOUD_OVERWRITE */
 </script></body></html>

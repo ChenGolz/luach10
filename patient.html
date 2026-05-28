@@ -3720,7 +3720,7 @@ function musicHtml(){
   const empty=!src&&!loading&&!trackLoading&&!list.length&&!err
     ?`<div class="big">${folderId?"התיקייה הוגדרה, אבל עדיין לא התקבלו שירים. אם זה נמשך, בדקו הרשאת Apps Script לתיקיית Drive ושיש בה קבצי MP3 ישירות בתוכה.":"לא נמצאה תיקיית Drive לשירים או קובץ שמע במסך הניהול."}</div>`
     :"";
-  return`<div class="musicOverlay" data-a="closeMusic"><div class="musicBox" data-allow-locked onclick="if(!event.target.closest('button,[data-a],a,input,select,textarea,audio'))event.stopPropagation()"><div class="title"><div class="icon">🎵</div><div><h2>${esc(label)}</h2><p>מוזיקה רגועה ללא פרסומות. אם השיר לא מתחיל לבד, אפשר ללחוץ על ההפעלה בנגן.</p></div></div>${waiting}${err&&!loading&&!trackLoading?`<div class="notice">${esc(err)}</div>`:""}${player}${tracks}${empty}<div class="actions"><button class="btn rose" data-a="closeMusic" data-allow-locked>סגירת חלון וחזרה ללוח</button></div></div></div>`;
+  return`<div class="musicOverlay" data-a="closeMusic"><div class="musicBox" data-allow-locked onclick="if(!event.target.closest('button,[data-a],a,input,select,textarea,audio'))event.stopPropagation()"><div class="title"><div class="icon">🎵</div><div><h2>${esc(label)}</h2><p>מוזיקה רגועה. בכל פתיחה מתחיל שיר אחר, ואם השיר לא מתחיל לבד אפשר ללחוץ על ההפעלה בנגן.</p></div></div>${waiting}${err&&!loading&&!trackLoading?`<div class="notice">${esc(err)}</div>`:""}${player}${tracks}${empty}<div class="actions"><button class="btn rose" data-a="closeMusic" data-allow-locked>סגירת חלון וחזרה ללוח</button></div></div></div>`;
 }
 
 
@@ -3830,6 +3830,49 @@ function passiveMessage(){
   passiveMessage.t=setTimeout(()=>el.classList.remove("show"),1800);
 }
 
+
+function musicShuffleEnabledV80(){
+  return true;
+}
+function musicLastFirstKeyV80(){
+  try{return "luach_last_music_first_"+safeBoardId()}catch{return "luach_last_music_first_default"}
+}
+function musicItemIdV80(item){
+  item=item||{};
+  return String(item.fileId||item.id||item.url||item.directUrl||item.name||"");
+}
+function chooseMusicStartIndexV80(list){
+  list=Array.isArray(list)?list:[];
+  if(!musicShuffleEnabledV80()||list.length<=1)return 0;
+  let last="";
+  try{last=localStorage.getItem(musicLastFirstKeyV80())||""}catch{}
+  const candidates=list.map((item,i)=>({item,i,id:musicItemIdV80(item)})).filter(x=>x.id!==last);
+  const pool=candidates.length?candidates:list.map((item,i)=>({item,i,id:musicItemIdV80(item)}));
+  const pick=pool[Math.floor(Math.random()*pool.length)]||pool[0];
+  try{localStorage.setItem(musicLastFirstKeyV80(),pick.id||"")}catch{}
+  return Number(pick.i)||0;
+}
+function shuffleMusicListV80(list,startIndex){
+  list=Array.isArray(list)?list.slice():[];
+  if(!musicShuffleEnabledV80()||list.length<=2)return list;
+  const first=list.splice(startIndex,1)[0];
+  for(let i=list.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=list[i];list[i]=list[j];list[j]=tmp;
+  }
+  return first?[first,...list]:list;
+}
+function prepareMusicShuffleV80(list){
+  list=Array.isArray(list)?list:[];
+  if(!list.length)return list;
+  const start=chooseMusicStartIndexV80(list);
+  const shuffled=shuffleMusicListV80(list,start);
+  window.__musicTrackIndexV51=0;
+  window.__musicPlaylistV51=shuffled;
+  return shuffled;
+}
+/* V80_MUSIC_SHUFFLE_HELPERS */
+
 function firstMusicUrlV79(item){
   item=item||{};
   return String(item.dataUrl||item.directUrl||item.url||item.driveUrl||"").trim();
@@ -3849,18 +3892,22 @@ function openMusicUrl(){
   window.__musicPlaylistErrorV51="";
   music=true;
   if(folderId){
-    const list=window.__musicPlaylistV51||[];
+    let list=window.__musicPlaylistV51||[];
     if(list.length){
-      const first=list[window.__musicTrackIndexV51||0]||list[0];
+      if(musicShuffleEnabledV80()){
+        list=prepareMusicShuffleV80(list);
+      }
+      const first=list[0];
       window.__musicAudioUrl=firstMusicUrlV79(first)||window.__musicAudioUrl||"";
       render();
-      if(typeof loadMusicTrackDataUrlV56==="function")loadMusicTrackDataUrlV56(window.__musicTrackIndexV51||0,true);
+      if(typeof loadMusicTrackDataUrlV56==="function")loadMusicTrackDataUrlV56(0,true);
       return;
     }
     window.__musicPlaylistLoading=true;
     render();
     loadMusicFolderPlaylistV53().then(list=>{
       if(list&&list.length){
+        list=prepareMusicShuffleV80(list);
         const first=list[0];
         window.__musicAudioUrl=firstMusicUrlV79(first)||window.__musicAudioUrl||"";
         render();
@@ -4674,4 +4721,6 @@ document.addEventListener("visibilitychange",()=>{try{applyPatientFullscreenClas
 /* V78_JSONP_LATE_CALLBACK_FIX_PATIENT */
 
 /* V79_PATIENT_PRINT_MUSIC_PRIVACY_PATIENT */
+
+/* V80_MUSIC_SHUFFLE_PATIENT */
 </script></body></html>

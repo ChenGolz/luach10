@@ -1,4 +1,4 @@
-const CACHE_NAME="family-clock-v79-patient-print-music-privacy";
+const CACHE_NAME="family-clock-v80-music-shuffle";
 const AUDIO_CACHE_NAME="family-clock-drive-audio-runtime-v3";
 
 const CORE_FILES=[
@@ -260,3 +260,5 @@ self.addEventListener("fetch",event=>{
 /* V78_JSONP_LATE_CALLBACK_FIX_SW */
 
 /* V79_PATIENT_PRINT_MUSIC_PRIVACY_SW */
+
+/* V80_MUSIC_SHUFFLE_SW */

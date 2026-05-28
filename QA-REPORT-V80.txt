@@ -1,0 +1,36 @@
+LUACH V80 MUSIC SHUFFLE QA
+Total checks: 10
+Passed: 10
+Failed: 0
+
+What this changes:
+- Adds lightweight shuffle on the patient side only.
+- No extra Drive/API calls are added.
+- When the music button is pressed, the first song is chosen randomly from the already-loaded/listed playlist.
+- The app tries not to start with the same song as last time on the same board/browser.
+- The playlist order is then shuffled so the following songs vary too.
+
+Files included:
+- patient.html
+- sw.js
+
+No Apps Script update is required.
+
+Changes:
+- patient.html: added lightweight music shuffle helpers
+- patient.html: shuffled already-loaded playlist before first playback
+- patient.html: shuffled freshly-loaded playlist before first playback
+- patient.html: updated music overlay hint to mention varied start song
+- sw.js: cache bumped to V80
+
+Checks:
+- PASS: syntax patient.html
+- PASS: syntax sw.js
+- PASS: shuffle helpers
+- PASS: loaded list shuffled
+- PASS: last first persisted
+- PASS: track starts from 0 after shuffle
+- PASS: music hint updated
+- PASS: patient marker
+- PASS: sw cache
+- PASS: sw marker

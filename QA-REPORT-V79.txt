@@ -1,0 +1,45 @@
+LUACH V79 PATIENT PRINT + MUSIC + PRIVACY QA
+Total checks: 17
+Passed: 17
+Failed: 0
+
+What changed:
+- Improved patient PDF/print CSS.
+- Improved fullscreen fit so text/cards are less likely to cut or overlap.
+- Changed music button label to 'לשמוע קצת מוזיקה'.
+- Added music playlist warmup and faster first-track start.
+- Made uncertainty wording gender-neutral: 'כשיש חוסר ביטחון' / 'אני חווה חוסר ביטחון'.
+- Redesigned now/next/later card sizing and progress bar behavior.
+- Suppressed routine cloud/save toast messages.
+- Added Apps Script per-board recording subfolders for default owner Drive storage.
+- Added backoffice note explaining safe sharing with friends.
+
+Privacy note:
+- Friends should not receive your Drive folder link.
+- In default mode, new recordings are placed in a separate subfolder per board.
+- For maximum separation, each friend can paste their own Drive folder in קול משפחתי.
+
+Files included:
+- patient.html
+- boindex.html
+- sw.js
+- apps-script/Code.gs
+
+Checks:
+- PASS: syntax patient.html
+- PASS: syntax boindex.html
+- PASS: syntax sw.js
+- PASS: syntax apps-script/Code.gs
+- PASS: print css v79
+- PASS: fullscreen css v79
+- PASS: music label
+- PASS: fast music
+- PASS: gender neutral
+- PASS: timeline design
+- PASS: quiet patient
+- PASS: quiet bo
+- PASS: privacy note
+- PASS: per-board folders
+- PASS: sw cache
+- PASS: markers
+- PASS: V78 JSONP guard retained

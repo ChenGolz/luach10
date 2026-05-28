@@ -1828,6 +1828,292 @@ body.patient-soft-fullscreen .patientExitFullscreenV62{
 }
 
 
+
+/* V79_PATIENT_PRINT_FULLSCREEN_TIMELINE */
+:root{--v79-card-gap:clamp(8px,1vw,14px)}
+.nowgrid{
+  gap:var(--v79-card-gap)!important;
+  align-items:stretch!important;
+}
+.nowtile{
+  padding:clamp(12px,1.25vw,20px)!important;
+  border-radius:clamp(18px,2vw,28px)!important;
+}
+.nowtile .emoji{
+  font-size:clamp(30px,3.2vw,48px)!important;
+  margin:.08em 0!important;
+}
+.nowtile .big{
+  font-size:clamp(24px,2.8vw,42px)!important;
+  line-height:1.12!important;
+  word-break:normal!important;
+  overflow-wrap:break-word!important;
+}
+.nowtile .medium{
+  font-size:clamp(17px,1.7vw,24px)!important;
+  line-height:1.15!important;
+}
+.nowtile.current{
+  border-width:3px!important;
+  background:linear-gradient(180deg,#eaf6ff,#ffffff)!important;
+}
+.nowtile .badge.timeBadge{
+  display:inline-block!important;
+  font-size:clamp(16px,1.7vw,24px)!important;
+  padding:.35em .7em!important;
+}
+
+body.patient-fullscreen,
+body.patient-soft-fullscreen{
+  overflow:hidden!important;
+}
+body.patient-fullscreen .shell,
+body.patient-soft-fullscreen .shell{
+  width:100vw!important;
+  max-width:none!important;
+  height:100svh!important;
+  max-height:100svh!important;
+  padding:clamp(6px,.7vw,12px)!important;
+  gap:clamp(6px,.75vw,10px)!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,25svh) minmax(0,38svh) minmax(0,33svh)!important;
+}
+body.patient-fullscreen .hero,
+body.patient-soft-fullscreen .hero{
+  min-height:0!important;
+  height:100%!important;
+  padding:clamp(8px,.9vw,14px)!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .hero-grid,
+body.patient-soft-fullscreen .hero-grid{
+  grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr)!important;
+  gap:clamp(8px,1vw,14px)!important;
+  align-items:center!important;
+  height:100%!important;
+}
+body.patient-fullscreen .h1,
+body.patient-soft-fullscreen .h1{
+  font-size:clamp(34px,6.6svh,72px)!important;
+  line-height:.95!important;
+  margin:.04em 0!important;
+}
+body.patient-fullscreen .lead,
+body.patient-soft-fullscreen .lead{
+  font-size:clamp(18px,2.75svh,30px)!important;
+  line-height:1.12!important;
+  max-width:100%!important;
+}
+body.patient-fullscreen .pill,
+body.patient-soft-fullscreen .pill{
+  font-size:clamp(14px,1.8svh,20px)!important;
+  padding:6px 12px!important;
+}
+body.patient-fullscreen .clock-card,
+body.patient-soft-fullscreen .clock-card{
+  padding:clamp(6px,.8vw,11px)!important;
+  min-width:0!important;
+  transform:scale(.92)!important;
+  transform-origin:center center!important;
+}
+body.patient-fullscreen .digital,
+body.patient-soft-fullscreen .digital{
+  font-size:clamp(40px,7.3svh,76px)!important;
+}
+body.patient-fullscreen .analog,
+body.patient-soft-fullscreen .analog{
+  width:clamp(78px,14svh,130px)!important;
+  height:clamp(78px,14svh,130px)!important;
+}
+body.patient-fullscreen .progressBoxV79,
+body.patient-soft-fullscreen .progressBoxV79{
+  padding:6px 10px!important;
+  margin-top:6px!important;
+}
+body.patient-fullscreen .progressBoxV79 .progressLabels,
+body.patient-soft-fullscreen .progressBoxV79 .progressLabels{
+  font-size:clamp(11px,1.55svh,16px)!important;
+  margin-bottom:4px!important;
+}
+body.patient-fullscreen .progressBoxV79 .progressCaption,
+body.patient-soft-fullscreen .progressBoxV79 .progressCaption{
+  font-size:clamp(12px,1.7svh,18px)!important;
+  margin-top:4px!important;
+}
+body.patient-fullscreen .orientCompact,
+body.patient-soft-fullscreen .orientCompact{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(6px,.85vw,10px)!important;
+  height:100%!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .orientCompact .card,
+body.patient-soft-fullscreen .orientCompact .card{
+  padding:clamp(8px,.95vw,14px)!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  justify-content:flex-start!important;
+}
+body.patient-fullscreen .title,
+body.patient-soft-fullscreen .title{
+  gap:6px!important;
+  margin-bottom:clamp(4px,.5svh,7px)!important;
+}
+body.patient-fullscreen .title h2,
+body.patient-soft-fullscreen .title h2{
+  font-size:clamp(22px,3.4svh,38px)!important;
+  line-height:1!important;
+}
+body.patient-fullscreen .title p,
+body.patient-soft-fullscreen .title p{display:none!important}
+body.patient-fullscreen .orientCompact .big,
+body.patient-soft-fullscreen .orientCompact .big{
+  font-size:clamp(23px,3.55svh,39px)!important;
+  line-height:1.08!important;
+}
+body.patient-fullscreen .orientCompact .medium,
+body.patient-soft-fullscreen .orientCompact .medium{
+  font-size:clamp(15px,2.1svh,23px)!important;
+  line-height:1.1!important;
+}
+body.patient-fullscreen .section.grid.wide,
+body.patient-soft-fullscreen .section.grid.wide,
+body.patient-fullscreen .daily,
+body.patient-soft-fullscreen .daily{
+  display:none!important;
+}
+body.patient-fullscreen .patientFamilySection,
+body.patient-soft-fullscreen .patientFamilySection{
+  display:block!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:clamp(7px,.85vw,12px)!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .patientFamilySection .title h2,
+body.patient-soft-fullscreen .patientFamilySection .title h2{
+  font-size:clamp(19px,2.75svh,31px)!important;
+}
+body.patient-fullscreen .familygrid,
+body.patient-soft-fullscreen .familygrid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(6px,.75vw,10px)!important;
+  height:calc(100% - 48px)!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .familygrid .contact,
+body.patient-soft-fullscreen .familygrid .contact{
+  min-height:0!important;
+  height:100%!important;
+  padding:clamp(7px,.8vw,11px)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+body.patient-fullscreen .familygrid .contact:nth-child(n+4),
+body.patient-soft-fullscreen .familygrid .contact:nth-child(n+4){display:none!important}
+body.patient-fullscreen .familygrid .contact .avatar,
+body.patient-soft-fullscreen .familygrid .contact .avatar{
+  width:clamp(42px,6svh,64px)!important;
+  height:clamp(42px,6svh,64px)!important;
+  font-size:clamp(26px,4.5svh,46px)!important;
+}
+body.patient-fullscreen .familygrid .contact .big,
+body.patient-soft-fullscreen .familygrid .contact .big{
+  font-size:clamp(18px,2.55svh,29px)!important;
+  line-height:1.06!important;
+}
+body.patient-fullscreen .familygrid .contact .medium,
+body.patient-soft-fullscreen .familygrid .contact .medium{
+  font-size:clamp(13px,1.85svh,20px)!important;
+  line-height:1.08!important;
+}
+body.patient-fullscreen .familygrid .contact .small,
+body.patient-soft-fullscreen .familygrid .contact .small{display:none!important}
+@media(max-height:720px){
+  body.patient-fullscreen .shell,body.patient-soft-fullscreen .shell{
+    grid-template-rows:minmax(0,24svh) minmax(0,39svh) minmax(0,33svh)!important;
+  }
+  body.patient-fullscreen .clock-card,body.patient-soft-fullscreen .clock-card{transform:scale(.86)!important}
+  body.patient-fullscreen .orientCompact .big,body.patient-soft-fullscreen .orientCompact .big{font-size:clamp(19px,3.1svh,32px)!important}
+}
+@media(max-width:880px), (orientation:portrait){
+  body.patient-fullscreen .shell,body.patient-soft-fullscreen .shell{
+    display:block!important;
+    overflow:auto!important;
+    height:auto!important;
+    max-height:none!important;
+  }
+  body.patient-fullscreen .hero-grid,body.patient-soft-fullscreen .hero-grid,
+  body.patient-fullscreen .orientCompact,body.patient-soft-fullscreen .orientCompact,
+  body.patient-fullscreen .familygrid,body.patient-soft-fullscreen .familygrid{
+    grid-template-columns:1fr!important;
+  }
+  body.patient-fullscreen .section.grid.wide,body.patient-soft-fullscreen .section.grid.wide{
+    display:grid!important;
+  }
+}
+
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  html,body{
+    background:white!important;
+    color:#102b3f!important;
+    width:auto!important;
+    height:auto!important;
+    overflow:visible!important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  body *{box-shadow:none!important;text-shadow:none!important}
+  .no-print,.nav,.status,.wakeBadge,.offlineCloudBadge,.syncStatusBadge,.patientFullActions,.tinyAdminLink,
+  .musicOverlay,.calmOverlay,.pingOverlay,.memories,.audioStartOverlay,button,audio,video,iframe{display:none!important}
+  #app,.shell{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:0!important;
+    margin:0!important;
+    background:white!important;
+    overflow:visible!important;
+  }
+  .hero,.section,.card,.contact,.nowtile{
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    background:#fff!important;
+    border:1.5px solid #cbdbe8!important;
+    border-radius:14px!important;
+    margin:0 0 5mm 0!important;
+    padding:6mm!important;
+    overflow:visible!important;
+  }
+  .hero-grid,.grid3,.orientCompact,.familygrid,.nowgrid{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:4mm!important;
+  }
+  .hero-grid{grid-template-columns:1.3fr .7fr!important}
+  .wide{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4mm!important}
+  .h1{font-size:32pt!important;line-height:1.05!important;margin:0 0 2mm!important}
+  .lead{font-size:16pt!important;line-height:1.2!important}
+  .digital{font-size:30pt!important}
+  .date{font-size:14pt!important}
+  .big{font-size:18pt!important;line-height:1.18!important}
+  .medium{font-size:12pt!important;line-height:1.2!important}
+  .small{font-size:9pt!important;line-height:1.15!important}
+  .title h2{font-size:18pt!important}
+  .title p{font-size:10pt!important}
+  .emoji{font-size:24pt!important}
+  .avatar{width:18mm!important;height:18mm!important;font-size:18pt!important}
+  .progressBoxV79{display:none!important}
+  a[href]::after{content:""!important}
+}
+/* V79_PATIENT_PRINT_FULLSCREEN_TIMELINE_END */
+
 </style><link rel="manifest" href="./manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2210,7 +2496,7 @@ function saveCloudConfig(){localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify(
 
 const DEFAULT={
   view:"patient",stage:"middle",
-  settings:{screensaverEnabled:true,screensaverMinutes:5,memoryIntervalSeconds:12,anchorChime:true,livePingChime:true,nightModeEnabled:true,nightStart:"22:00",nightEnd:"06:00",wakeLockEnabled:true,weatherEnabled:true,weatherLat:"32.0853",weatherLon:"34.7818",weatherCity:"תל אביב",weatherAutoFromProfile:true,musicUrl:"https://www.youtube.com/embed/videoseries?list=PLyYVZfWnC5AmHo7UeSHc3dXWOLZ3XLGN5",musicButtonLabel:"לשמוע שירים שאני אוהבת",heartbeatEnabled:true,patientPassiveLock:true,lockTouchScreen:false,ttsVoicePreference:"female",ttsVoiceURI:"",ttsRate:.68,ttsPitch:1.06,ttsChunked:true,ttsPauseMs:220},
+  settings:{screensaverEnabled:true,screensaverMinutes:5,memoryIntervalSeconds:12,anchorChime:true,livePingChime:true,nightModeEnabled:true,nightStart:"22:00",nightEnd:"06:00",wakeLockEnabled:true,weatherEnabled:true,weatherLat:"32.0853",weatherLon:"34.7818",weatherCity:"תל אביב",weatherAutoFromProfile:true,musicUrl:"https://www.youtube.com/embed/videoseries?list=PLyYVZfWnC5AmHo7UeSHc3dXWOLZ3XLGN5",musicButtonLabel:"לשמוע קצת מוזיקה",heartbeatEnabled:true,patientPassiveLock:true,lockTouchScreen:false,ttsVoicePreference:"female",ttsVoiceURI:"",ttsRate:.68,ttsPitch:1.06,ttsChunked:true,ttsPauseMs:220},
   livePing:null,
   voiceStorage:{mode:"owner",folderId:"",maxSeconds:45},
   voiceRecordings:{calm:"",confused:"",night:""},
@@ -2222,7 +2508,7 @@ const DEFAULT={
   care:{date:new Date().toISOString().slice(0,10),waterMorning:false,waterNoon:false,waterEvening:false,breakfast:"לא סומן",lunch:"לא סומן",dinner:"לא סומן",toileting:"לא סומן",pain:"לא סומן",mood:"רגוע/ה",sleep:"לא סומן",note:""},
   symptoms:[],
   monthly:[{id:1,date:new Date().toISOString().slice(0,10),title:"יום רגיל ונעים"}],
-  safety:{exitMessage:"הכול בסדר. אם תרצי לצאת, נתקשר קודם לנועה. לא יוצאים לבד.",confusedMessage:"את בבית. המשפחה יודעת איפה את. אין צורך לצאת לבד. אפשר להתקשר לנועה.",emergency:"במקרה חירום בלבד: להתקשר 101 ואז לעדכן את המשפחה.",doorSensor:"אם הדלת נפתחה בלי ליווי - להתקשר מיד למשפחה.",homeChecklist:"לבדוק דלת, גז, תרופות, שטיחים, תאורה ומקלחת.",nightMessage:"עכשיו אמצע הלילה. כולם ישנים והכול בטוח. אפשר לחזור לישון.",bathroomHint:"אם צריך שירותים - ללכת לאט ובזהירות לפי האור.",wanderingNote:"מומלץ לשתף מיקום ב-Google Maps מהטלפון שנמצא בתיק/כיס, ולוודא שהשיתוף מוגדר עד שאשבית אפשרות זו."}
+  safety:{exitMessage:"הכול בסדר. אם עולה רצון לצאת, נתקשר קודם לנועה. לא יוצאים לבד.",confusedMessage:"הכול בסדר. הבית כאן. המשפחה יודעת איפה את. אין צורך לצאת לבד. אפשר להתקשר לנועה.",emergency:"במקרה חירום בלבד: להתקשר 101 ואז לעדכן את המשפחה.",doorSensor:"אם הדלת נפתחה בלי ליווי - להתקשר מיד למשפחה.",homeChecklist:"לבדוק דלת, גז, תרופות, שטיחים, תאורה ומקלחת.",nightMessage:"עכשיו אמצע הלילה. כולם ישנים והכול בטוח. אפשר לחזור לישון.",bathroomHint:"אם צריך שירותים - ללכת לאט ובזהירות לפי האור.",wanderingNote:"מומלץ לשתף מיקום ב-Google Maps מהטלפון שנמצא בתיק/כיס, ולוודא שהשיתוף מוגדר עד שאשבית אפשרות זו."}
 };
 let cloudLast="";
 function clone(o){return JSON.parse(JSON.stringify(o))}
@@ -2255,7 +2541,7 @@ function timeInRange(nowDate,start,end){const n=nowDate.getHours()*60+nowDate.ge
 function title(icon,t,sub=""){return`<div class="title"><div class="icon">${icon}</div><div><h2>${esc(t)}</h2>${sub?`<p>${esc(sub)}</p>`:""}</div></div>`}
 function avatar(o,f="❤️"){return o.photo?`<div class="avatar"><img src="${esc(o.photo)}"></div>`:`<div class="avatar">${esc(o.emoji||f)}</div>`}
 function analog(d){const h=d.getHours()%12,m=d.getMinutes(),s=d.getSeconds(),ha=h*30+m*.5,ma=m*6,sa=s*6;let ticks="";for(let i=0;i<12;i++){const a=i*30,r=Math.PI/180*a,x1=60+Math.sin(r)*43,y1=60-Math.cos(r)*43,x2=60+Math.sin(r)*49,y2=60-Math.cos(r)*49;ticks+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`}return`<svg viewBox="0 0 120 120" width="144" height="144"><circle cx="60" cy="60" r="54" fill="white" stroke="currentColor" stroke-width="4" opacity=".95"></circle>${ticks}<line x1="60" y1="60" x2="60" y2="31" stroke="currentColor" stroke-width="6" stroke-linecap="round" transform="rotate(${ha} 60 60)"></line><line x1="60" y1="60" x2="60" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round" transform="rotate(${ma} 60 60)"></line><line x1="60" y1="66" x2="60" y2="18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".45" transform="rotate(${sa} 60 60)"></line><circle cx="60" cy="60" r="5" fill="currentColor"></circle></svg>`}
-function progress(d){const p=Math.min(100,Math.max(0,(d.getHours()*60+d.getMinutes())/1440*100));return`<div style="margin-top:16px;border-radius:24px;background:#f7f4ee;color:#24312f;padding:14px"><div style="display:flex;justify-content:space-between;font-weight:1000;color:#667774;margin-bottom:8px"><span>בוקר</span><span>צהריים</span><span>ערב</span><span>לילה</span></div><div style="height:18px;border-radius:999px;background:#e7ded2;overflow:hidden"><div style="height:100%;width:${p}%;background:#24312f;border-radius:999px"></div></div><div style="text-align:center;margin-top:8px;font-weight:1000;font-size:20px">ככה היום מתקדם</div></div>`}
+function progress(d){const p=Math.min(100,Math.max(0,(d.getHours()*60+d.getMinutes())/1440*100));return`<div class="progressBoxV79" style="margin-top:16px;border-radius:24px;background:#f7f4ee;color:#24312f;padding:14px"><div class="progressLabels" style="display:flex;justify-content:space-between;font-weight:1000;color:#667774;margin-bottom:8px"><span>בוקר</span><span>צהריים</span><span>ערב</span><span>לילה</span></div><div style="height:18px;border-radius:999px;background:#e7ded2;overflow:hidden"><div style="height:100%;width:${p}%;background:#24312f;border-radius:999px"></div></div><div class="progressCaption" style="text-align:center;margin-top:8px;font-weight:1000;font-size:20px">ככה היום מתקדם</div></div>`}
 function showStatus(msg){let el=document.getElementById("status");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(showStatus.t);showStatus.t=setTimeout(()=>el.classList.remove("show"),1400)}
 
 let __cloudFailCount=0;
@@ -3106,6 +3392,19 @@ function weatherHtml(){
   if(!weather)return"";
   return`<div class="weatherInline">${weather.icon} ${esc(weather.txt)} · ${weather.temp}° · ${esc(weatherLocationName()||data.settings.weatherCity||"בחוץ")}</div>`;
 }
+
+const __showStatusBeforeQuietV79=showStatus;
+function showStatus(msg){
+  msg=String(msg||"");
+  const quiet=[
+    "עודכן מהענן","נשלח לשמירה","נשמר","עודכן","חיבור חזר","אין חיבור רשת",
+    "מציג נתונים שמורים מקומית","לא התחבר לגוגל שיט"
+  ];
+  if(quiet.some(x=>msg.includes(x)))return;
+  return __showStatusBeforeQuietV79(msg);
+}
+/* V79_QUIET_PATIENT_CLOUD_STATUS */
+
 function statusBadges(){
   return`${!isOnline?`<div class="offlineBadge no-print">🔴 אין אינטרנט</div>`:""}${wakeLockState==="active"?`<div class="wakeBadge no-print">🟢 המסך נשאר דלוק</div>`:""}${cloudOn()?`<div class="wakeBadge no-print" style="top:62px">☁️ ענן פעיל</div>`:""}`;
 }
@@ -3379,7 +3678,7 @@ function softFullscreenExitHtml(){
 }
 
 
-function header(){const p=dayPart(now),tm=`${two(now.getHours())}:${two(now.getMinutes())}`,th=theme(now);document.body.className=th.s+(isPatientFullscreenActive()?" patient-fullscreen":"")+(window.__patientSoftFullscreen&&!document.fullscreenElement?" patient-soft-fullscreen":"");const first=(data.person.firstName||"").trim();return`<header class="hero"><div class="hero-grid"><div><div class="pill">${p.emoji} ${p.label}</div><h1 class="h1">${first?`שלום ${esc(first)}`:"שלום"}</h1><p class="lead">${esc(p.sentence)}</p></div><div class="clock-card"><div class="time-row">${analog(now)}<div class="clockStack"><div class="digital">${tm}</div><div class="digital12">${time12Hebrew(now)}</div></div></div><div class="date">${esc(fullDate(now))}</div><div class="today">היום</div>${weatherHtml()}${progress(now)}</div></div><nav class="nav no-print"><button class="warm" data-a="calm" data-allow-locked>🌿 אני חווה בלבול</button>${patientMusicAvailableV51()?`<button class="soft" data-a="music" data-allow-locked>🎵 ${esc(patientSafeAudioLabel())}</button>`:""}<button data-a="print" data-allow-locked>🖨️ הדפסה</button><button data-a="full" data-allow-locked>⛶ מסך מלא</button></nav></header>`}
+function header(){const p=dayPart(now),tm=`${two(now.getHours())}:${two(now.getMinutes())}`,th=theme(now);document.body.className=th.s+(isPatientFullscreenActive()?" patient-fullscreen":"")+(window.__patientSoftFullscreen&&!document.fullscreenElement?" patient-soft-fullscreen":"");const first=(data.person.firstName||"").trim();return`<header class="hero"><div class="hero-grid"><div><div class="pill">${p.emoji} ${p.label}</div><h1 class="h1">${first?`שלום ${esc(first)}`:"שלום"}</h1><p class="lead">${esc(p.sentence)}</p></div><div class="clock-card"><div class="time-row">${analog(now)}<div class="clockStack"><div class="digital">${tm}</div><div class="digital12">${time12Hebrew(now)}</div></div></div><div class="date">${esc(fullDate(now))}</div><div class="today">היום</div>${weatherHtml()}${progress(now)}</div></div><nav class="nav no-print"><button class="warm" data-a="calm" data-allow-locked>🌿 אני חווה חוסר ביטחון</button>${patientMusicAvailableV51()?`<button class="soft" data-a="music" data-allow-locked>🎵 ${esc(patientSafeAudioLabel())}</button>`:""}<button data-a="print" data-allow-locked>🖨️ הדפסה</button><button data-a="full" data-allow-locked>⛶ מסך מלא</button></nav></header>`}
 
 function items(){const d=now.getDay();return[...data.schedule].filter(x=>x.forPatient&&(!Array.isArray(x.days)||x.days.includes(d))).sort((a,b)=>String(a.time).localeCompare(String(b.time)))}
 function nxl(){const c=now.getHours()*60+now.getMinutes(),it=items(),f=it.filter(x=>min(x.time)>=c),past=it.filter(x=>min(x.time)<=c).slice(-1)[0];return{n:f[0]||past,x:f[1],l:f[2]}}
@@ -3388,7 +3687,7 @@ function nowNext(){const x=nxl(),adv=data.stage==="advanced";return`<div class="
 function contact(c){const phone=String(c.phone||"").replace(/[^0-9+]/g,""),tel=`tel:${phone}`,qr=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(tel)}`;return`<div class="contact"><div class="contacttop"><div class="person">${avatar(c,"☎️")}<div><div style="font-size:32px;font-weight:1000">${esc(c.relation)}</div><div class="medium" style="color:#667774">${esc(c.name)}</div><div class="small">${esc(c.note)}</div></div></div><div><a class="phone" href="${tel}">${esc(c.phone)}</a>${c.videoLink?`<a class="video" target="_blank" href="${esc(c.videoLink)}">🎥 שיחת וידאו</a>`:""}</div></div><details class="details no-print"><summary>📱 אם אין סים בטאבלט - QR לחיוג</summary><div class="qr"><img src="${qr}"><div class="medium">מי שנמצא ליד הלוח יכול לסרוק ולחייג מיד.</div></div></details></div>`}
 function phones(){const shown=data.stage==="advanced"?data.contacts.slice(0,2):data.contacts;return`<div class="card">${title("☎️","למי אפשר להתקשר?","")}${shown.map(contact).join("")}</div>`}
 function patientDisplayName(){return (data.person.fullName||data.person.firstName||"").trim()}
-function orient(){const name=patientDisplayName();return`<section class="section grid grid3 orientCompact"><div class="card warm">${title("🏠","איפה אני?")}<div class="big"><p>אני בבית.</p>${data.person.address?`<p>${esc(data.person.address)}</p>`:""}${data.person.city?`<p>${esc(data.person.city)}</p>`:""}</div>${data.person.safeMessage?`<div class="medium safeMsg">${esc(data.person.safeMessage)}</div>`:""}</div><div class="card green">${title("❤️","מי אני?","")}<div class="medium">${name?`<p><strong>שם:</strong> ${esc(name)}</p>`:""}${data.person.identityNote?`<p><strong>משפט חשוב:</strong> ${esc(data.person.identityNote)}</p>`:""}</div></div><div class="card rose">${title("🛡️","אם אני לא בטוחה")}<div class="big"><p>לעצור רגע.</p><p>לנשום.</p><p>הכול בסדר.</p>${data.safety.confusedMessage?`<p>${esc(data.safety.confusedMessage)}</p>`:""}</div></div></section>`}
+function orient(){const name=patientDisplayName();return`<section class="section grid grid3 orientCompact"><div class="card warm">${title("🏠","איפה אני?")}<div class="big"><p>אני בבית.</p>${data.person.address?`<p>${esc(data.person.address)}</p>`:""}${data.person.city?`<p>${esc(data.person.city)}</p>`:""}</div>${data.person.safeMessage?`<div class="medium safeMsg">${esc(data.person.safeMessage)}</div>`:""}</div><div class="card green">${title("❤️","מי אני?","")}<div class="medium">${name?`<p><strong>שם:</strong> ${esc(name)}</p>`:""}${data.person.identityNote?`<p><strong>משפט חשוב:</strong> ${esc(data.person.identityNote)}</p>`:""}</div></div><div class="card rose">${title("🛡️","כשיש חוסר ביטחון")}<div class="big"><p>לעצור רגע.</p><p>לנשום.</p><p>הכול בסדר.</p>${data.safety.confusedMessage?`<p>${esc(data.safety.confusedMessage)}</p>`:""}</div></div></section>`}
 function family(){if(data.stage==="advanced")return"";return`<section class="section card patientFamilySection">${title("👨‍👩‍👧","המשפחה הקרובה שלי","תזכורת נעימה לאנשים אהובים")}<div class="familygrid">${data.family.map(f=>`<div class="contact">${avatar(f,"❤️")}<div style="font-size:28px;font-weight:1000;margin-top:12px">${esc(f.relation)}</div><div class="big">${esc(f.name)}</div><div class="medium" style="color:#667774">${esc(f.city)}</div><div class="small">${esc(f.note)}</div></div>`).join("")}</div></section>`}
 function daily(){
   if(data.stage!=="early")return"";
@@ -3457,7 +3756,7 @@ function memories(){const list=[...data.family.map(x=>({...x,caption:`${x.name},
 
 function nightMusicActionsHtmlV60(){
   const musicBtn=patientMusicAvailableV51()?`<button class="btn musicNight no-print" data-a="music" data-allow-locked>🎵 ${esc(patientSafeAudioLabel())}</button>`:"";
-  return `<div class="nightActionsV60 no-print" data-allow-locked>${musicBtn}<button class="btn calmNight" data-a="calm" data-allow-locked>🌿 אני חווה בלבול</button></div>`;
+  return `<div class="nightActionsV60 no-print" data-allow-locked>${musicBtn}<button class="btn calmNight" data-a="calm" data-allow-locked>🌿 אני חווה חוסר ביטחון</button></div>`;
 }
 
 
@@ -3530,6 +3829,63 @@ function passiveMessage(){
   clearTimeout(passiveMessage.t);
   passiveMessage.t=setTimeout(()=>el.classList.remove("show"),1800);
 }
+
+function firstMusicUrlV79(item){
+  item=item||{};
+  return String(item.dataUrl||item.directUrl||item.url||item.driveUrl||"").trim();
+}
+async function warmMusicPlaylistV79(){
+  try{
+    const folderId=patientMusicFolderIdV51?.()||patientMusicFolderIdV53?.();
+    if(!folderId)return;
+    if(window.__musicPlaylistV51&&window.__musicPlaylistV51.length)return;
+    if(window.__musicPlaylistLoading)return;
+    await loadMusicFolderPlaylistV53();
+  }catch(err){console.warn("music warmup failed",err)}
+}
+function openMusicUrl(){
+  const folderId=patientMusicFolderIdV51?.()||patientMusicFolderIdV53?.();
+  const url=patientSafeAudioUrl();
+  window.__musicPlaylistErrorV51="";
+  music=true;
+  if(folderId){
+    const list=window.__musicPlaylistV51||[];
+    if(list.length){
+      const first=list[window.__musicTrackIndexV51||0]||list[0];
+      window.__musicAudioUrl=firstMusicUrlV79(first)||window.__musicAudioUrl||"";
+      render();
+      if(typeof loadMusicTrackDataUrlV56==="function")loadMusicTrackDataUrlV56(window.__musicTrackIndexV51||0,true);
+      return;
+    }
+    window.__musicPlaylistLoading=true;
+    render();
+    loadMusicFolderPlaylistV53().then(list=>{
+      if(list&&list.length){
+        const first=list[0];
+        window.__musicAudioUrl=firstMusicUrlV79(first)||window.__musicAudioUrl||"";
+        render();
+        if(typeof loadMusicTrackDataUrlV56==="function")loadMusicTrackDataUrlV56(0,true);
+      }else{
+        render();
+      }
+    }).catch(err=>{
+      console.warn("music folder open failed",err);
+      window.__musicPlaylistErrorV51="לא הצלחתי לטעון את תיקיית השירים כרגע.";
+      render();
+    });
+    return;
+  }
+  if(url){
+    window.__musicAudioUrl=url;
+    render();
+    setTimeout(()=>{const a=document.getElementById("safeMusicPlayer");if(a)a.play().catch(()=>{})},120);
+    return;
+  }
+  window.__musicPlaylistErrorV51="לא נמצאה תיקיית Drive לשירים או קובץ שמע. בדקו שהקישור נשמר במסך הניהול.";
+  render();
+}
+/* V79_FAST_MUSIC_OPEN_AND_PREFETCH */
+
 document.addEventListener("click",e=>{
   if(data&&data.settings&&data.settings.patientPassiveLock){
     const allowed=e.target.closest(
@@ -3577,7 +3933,7 @@ function patientSafeAudioUrl(){
 }
 function patientSafeAudioLabel(){
   const s=data&&data.settings?data.settings:{};
-  return String(s.patientAudioButtonLabel||s.musicButtonLabel||"מוזיקה רגועה").trim()||"מוזיקה רגועה";
+  const raw=String(s.patientAudioButtonLabel||s.musicButtonLabel||"לשמוע קצת מוזיקה").trim()||"לשמוע קצת מוזיקה";return raw==="לשמוע שירים שאני אוהבת"? "לשמוע קצת מוזיקה" : raw;/* V79_PATIENT_MUSIC_LABEL_NORMALIZE */
 }
 function openMusicExternal(){
   const raw=patientRawMusicValueV49();
@@ -3631,7 +3987,7 @@ function patientMusicAvailableV51(){
   return !!(patientSafeAudioUrl()||patientMusicFolderIdV51());
 }
 function fullscreenActionsHtmlV51(){
-  return `<div class="patientFullActions no-print" data-allow-locked><button type="button" class="warm" data-a="calm" data-allow-locked>🌿 אני חווה בלבול</button>${patientMusicAvailableV51()?`<button type="button" class="music" data-a="music" data-allow-locked>🎵 ${esc(patientSafeAudioLabel())}</button>`:""}</div>`;
+  return `<div class="patientFullActions no-print" data-allow-locked><button type="button" class="warm" data-a="calm" data-allow-locked>🌿 אני חווה חוסר ביטחון</button>${patientMusicAvailableV51()?`<button type="button" class="music" data-a="music" data-allow-locked>🎵 ${esc(patientSafeAudioLabel())}</button>`:""}</div>`;
 }
 function jsonpMusicFolderV51(folderId){
   return new Promise((resolve,reject)=>{
@@ -4316,4 +4672,6 @@ document.addEventListener("visibilitychange",()=>{try{applyPatientFullscreenClas
 
 
 /* V78_JSONP_LATE_CALLBACK_FIX_PATIENT */
+
+/* V79_PATIENT_PRINT_MUSIC_PRIVACY_PATIENT */
 </script></body></html>

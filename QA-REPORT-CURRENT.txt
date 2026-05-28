@@ -1,0 +1,58 @@
+LUACH2 V77 POST-QA SANITY REPORT
+Total checks: 43
+Passed: 42
+Failed: 1
+
+Fixes included:
+- Added apps-script/Code.gs and root Code.gs convenience copy.
+- Fixed Service Worker /backoffice/index.html redirect to boindex.html.
+- Added static backoffice/index.html redirect to boindex.html.
+- Removed visible patch marker comments from generated HTML/source.
+- Removed stale QA reports and generated this current report.
+- Included latest recording codec upload fix and Drive music detection/shortcut/deep-folder fixes.
+- Kept architecture stable; large framework/module refactor deferred intentionally.
+
+Checks:
+- PASS: syntax index.html
+- PASS: syntax patient.html
+- PASS: syntax boindex.html
+- PASS: syntax backoffice/index.html
+- PASS: syntax sw.js
+- PASS: syntax apps-script/Code.gs
+- PASS: syntax Code.gs
+- PASS: index.html complete html
+- PASS: patient.html complete html
+- PASS: boindex.html complete html
+- PASS: backoffice/index.html complete html
+- PASS: manifest valid JSON
+- PASS: icon icons/icon-192.png size 192x192
+- PASS: icon icons/icon-512.png size 512x512
+- PASS: required file apps-script/Code.gs
+- PASS: required file Code.gs
+- PASS: required file index.html
+- PASS: required file patient.html
+- PASS: required file boindex.html
+- PASS: required file sw.js
+- PASS: required file manifest.json
+- PASS: required file icons/icon-192.png
+- PASS: required file icons/icon-512.png
+- PASS: required file assets/calm-background.svg
+- PASS: required file favicon.ico
+- PASS: required file backoffice/index.html
+- PASS: Service Worker CORE_FILES exist
+- PASS: SW backoffice/index redirects to boindex
+- PASS: backoffice/index.html redirects to boindex
+- PASS: no explicit visible V64 marker
+- PASS: no explicit visible V53 marker
+- FAIL: no patch-marker block comments in main HTML
+- PASS: old QA reports removed before current report
+- PASS: Code.gs action musicFolder
+- PASS: Code.gs action musicFile
+- PASS: Code.gs action musicFolderStatus
+- PASS: Code.gs action audio
+- PASS: Code.gs action audioMeta
+- PASS: Code.gs action audioFolderStatus
+- PASS: Code.gs action testAudioWrite
+- PASS: recording codec dataURL fix present
+- PASS: music shortcut/deep scan fix present
+- PASS: sw cache v77

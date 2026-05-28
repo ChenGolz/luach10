@@ -2032,6 +2032,28 @@ function setFamilyAccessKey(key){
 
 function currentFamilyAccessKey(){return accessKeyFromUrlOrStorage()}
 
+
+
+function installJsonpCallbackV78(name,onPayload,timeoutMs=22000,label="jsonp"){
+  let settled=false;
+  let timer=null;
+  const softCleanup=()=>{
+    try{window[name]=function(){}}catch{}
+    setTimeout(()=>{try{delete window[name]}catch{}},90000);
+  };
+  const finish=(ok,value)=>{
+    if(settled)return;
+    settled=true;
+    if(timer)clearTimeout(timer);
+    try{onPayload(ok,value)}catch(err){console.warn(label+" callback handler failed",err)}
+    softCleanup();
+  };
+  window[name]=payload=>finish(true,payload);
+  timer=setTimeout(()=>finish(false,new Error(label+" timeout")),timeoutMs);
+  return {finish,cleanup:softCleanup};
+}
+/* V78_JSONP_LATE_CALLBACK_GUARD */
+
 function familyHashParams(){
   const h=(location.hash||"").replace(/^#/,"");
   return new URLSearchParams(h);
@@ -2530,7 +2552,7 @@ async function jsonpAudioV48(key){
     const sep=apiBase().includes("?")?"&":"?";
     let settled=false;
     let timer=null;
-    const cleanup=()=>{try{delete window[cb]}catch{};try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
     const done=(ok,value)=>{if(settled)return;settled=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>done(false,new Error("audio timeout")),14000);
     window[cb]=payload=>done(true,payload);
@@ -2647,7 +2669,7 @@ function jsonpAudioV56(key){
     const sep=apiBase().includes("?")?"&":"?";
     let settled=false;
     let timer=null;
-    const cleanup=()=>{try{delete window[cb]}catch{};try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
     const done=(ok,value)=>{if(settled)return;settled=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>done(false,new Error("audio timeout")),22000);
     window[cb]=payload=>done(true,payload);
@@ -3619,7 +3641,7 @@ function jsonpMusicFolderV51(folderId){
     const sep=apiBase().includes("?")?"&":"?";
     let settled=false;
     let timer=null;
-    const cleanup=()=>{try{delete window[cb]}catch{};try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
     const done=(ok,value)=>{if(settled)return;settled=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>done(false,new Error("music folder timeout")),16000);
     window[cb]=payload=>done(true,payload);
@@ -3811,7 +3833,7 @@ function jsonpMusicFileV56(fileId,folderId){
     const sep=apiBase().includes("?")?"&":"?";
     let settled=false;
     let timer=null;
-    const cleanup=()=>{try{delete window[cb]}catch{};try{script.remove()}catch{};if(timer)clearTimeout(timer)};
+    const cleanup=()=>{try{window[cb]=function(){}}catch{};setTimeout(()=>{try{delete window[cb]}catch{}},90000);try{script.remove()}catch{};if(timer)clearTimeout(timer)};
     const done=(ok,value)=>{if(settled)return;settled=true;cleanup();ok?resolve(value):reject(value)};
     timer=setTimeout(()=>done(false,new Error("music file timeout")),26000);
     window[cb]=payload=>done(true,payload);
@@ -4292,4 +4314,6 @@ document.addEventListener("visibilitychange",()=>{try{applyPatientFullscreenClas
 
 
 
+
+/* V78_JSONP_LATE_CALLBACK_FIX_PATIENT */
 </script></body></html>

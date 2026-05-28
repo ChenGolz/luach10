@@ -1,0 +1,30 @@
+LUACH V78 JSONP LATE CALLBACK FIX QA
+Total checks: 11
+Passed: 11
+Failed: 0
+
+What this fixes:
+- Prevents late Apps Script JSONP responses from throwing ReferenceError: luach_cb_... is not defined.
+- JSONP cleanup now leaves a temporary noop callback for 90 seconds instead of deleting it immediately.
+- Load timeouts were extended so slow Apps Script responses have more time before fallback.
+
+Files included:
+- index.html
+- patient.html
+- boindex.html
+- sw.js
+
+No Apps Script update is required for this patch.
+
+Checks:
+- PASS: syntax index.html
+- PASS: syntax patient.html
+- PASS: syntax boindex.html
+- PASS: syntax sw.js
+- PASS: helper in index
+- PASS: helper in patient
+- PASS: helper in boindex
+- PASS: late noop cleanup present
+- PASS: short timeouts removed
+- PASS: markers
+- PASS: sw cache

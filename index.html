@@ -208,6 +208,28 @@ function randomFamilyAccessKey(){
 }
 function currentFamilyAccessKey(){return accessKeyFromUrlOrStorage()}
 
+
+
+function installJsonpCallbackV78(name,onPayload,timeoutMs=22000,label="jsonp"){
+  let settled=false;
+  let timer=null;
+  const softCleanup=()=>{
+    try{window[name]=function(){}}catch{}
+    setTimeout(()=>{try{delete window[name]}catch{}},90000);
+  };
+  const finish=(ok,value)=>{
+    if(settled)return;
+    settled=true;
+    if(timer)clearTimeout(timer);
+    try{onPayload(ok,value)}catch(err){console.warn(label+" callback handler failed",err)}
+    softCleanup();
+  };
+  window[name]=payload=>finish(true,payload);
+  timer=setTimeout(()=>finish(false,new Error(label+" timeout")),timeoutMs);
+  return {finish,cleanup:softCleanup};
+}
+/* V78_JSONP_LATE_CALLBACK_GUARD */
+
 function familyHashParams(){
   const h=(location.hash||"").replace(/^#/,"");
   return new URLSearchParams(h);
@@ -654,6 +676,8 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 
 
 
+
+/* V78_JSONP_LATE_CALLBACK_FIX_INDEX */
 </script>
 </body>
 </html>

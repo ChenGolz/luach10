@@ -1,0 +1,27 @@
+LUACH V83 MUSIC FOLDER RECURSION FIX QA
+Total checks: 11
+Passed: 11
+Failed: 0
+
+What this fixes:
+- Fixes 'Maximum call stack size exceeded' in בדיקת תיקיית שירים.
+- Replaces recursive Drive folder scanning with iterative queue scanning.
+- Tracks seen folders/files to avoid loops caused by shortcuts or folder cycles.
+- Still supports Google Drive shortcuts, subfolders, and broad music extensions.
+
+Required:
+- Replace Code.gs in Google Apps Script.
+- Deploy → Manage deployments → Edit → New version → Deploy.
+
+Checks:
+- PASS: syntax Code.gs
+- PASS: syntax sw.js
+- PASS: iterative scanner
+- PASS: status override
+- PASS: list override
+- PASS: find override
+- PASS: cycle guards
+- PASS: shortcut support
+- PASS: broad extensions
+- PASS: apps marker
+- PASS: sw cache

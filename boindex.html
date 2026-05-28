@@ -1015,6 +1015,32 @@ body:not(.force-light) .caregiverEncouragement p{
 }
 
 
+
+/* V82_MOBILE_SHARE_CLOUD_CSS */
+.mobileShareNoteV82{
+  margin-top:14px;
+  background:#fff7df;
+  border:2px solid #f1d596;
+  color:#4b3b18;
+  border-radius:22px;
+  padding:14px 16px;
+  font-size:18px;
+  font-weight:900;
+  line-height:1.35;
+}
+.cloudVerifyBoxV82{
+  margin-top:14px;
+  background:#f3fff7;
+  border:2px solid #bce8c8;
+  color:#1e4d2b;
+  border-radius:22px;
+  padding:14px 16px;
+  font-size:18px;
+  font-weight:900;
+  line-height:1.35;
+}
+/* V82_MOBILE_SHARE_CLOUD_CSS_END */
+
 </style><link rel="manifest" href="./manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1258,7 +1284,7 @@ function missingAccessKeyNotice(){
 function accessKeyManagerHtml(){
   const key=currentFamilyAccessKey();
   const masked=key?`${key.slice(0,6)}••••••••••••••••${key.slice(-6)}`:"אין מפתח שמור בדפדפן הזה";
-  return `<section class="accessKeyManager"><h3>🔐 מפתח גישה משפחתי</h3><p>זה אזור הגדרות מתקדם. המפתח נשמר בדפדפן הזה ומופיע גם בקישור המשפחתי המקורי. הוא עוזר לוודא שרק מי שקיבל את הקישור יכול לקרוא או לעדכן את הלוח.</p><input class="accessKeyBox" id="accessKeyBox" readonly value="${esc(masked)}"><div class="actions"><button class="btn soft" data-a="copyAccessKey">📋 העתקת המפתח</button><button class="btn soft" data-a="showAccessKey">👁️ הצגת המפתח</button><button class="btn rose" data-a="rotateAccessKey">🔄 יצירת מפתח חדש</button></div><div class="dangerNote">אם יוצרים מפתח חדש, צריך לשלוח מחדש את הקישורים למשפחה. קישורים ישנים עם המפתח הקודם לא יעבדו אחרי ההחלפה.</div></section>`;
+  return `<section class="accessKeyManager"><h3>🔐 מפתח גישה משפחתי</h3>${mobileShareNoteV82()}<p>זה אזור הגדרות מתקדם. המפתח נשמר בדפדפן הזה ומופיע גם בקישור המשפחתי המקורי. הוא עוזר לוודא שרק מי שקיבל את הקישור יכול לקרוא או לעדכן את הלוח.</p><input class="accessKeyBox" id="accessKeyBox" readonly value="${esc(masked)}"><div class="actions"><button class="btn soft" data-a="copyAccessKey">📋 העתקת המפתח</button><button class="btn soft" data-a="showAccessKey">👁️ הצגת המפתח</button><button class="btn rose" data-a="rotateAccessKey">🔄 יצירת מפתח חדש</button></div><div class="dangerNote">אם יוצרים מפתח חדש, צריך לשלוח מחדש את הקישורים למשפחה. קישורים ישנים עם המפתח הקודם לא יעבדו אחרי ההחלפה.</div></section>`;
 }
 function setFamilyAccessKey(key){
   key=String(key||"").trim();
@@ -2262,6 +2288,66 @@ function addPrivateParamsToLinkV52(url){
 }
 
 
+
+function mobileShareNoteV82(){
+  return `<div class="mobileShareNoteV82">חשוב לנייד או טאבלט חדש: להעתיק מכאן את הקישור המלא. לא להעתיק את הכתובת משורת הדפדפן אחרי שהלוח כבר נפתח, כי הדפדפן מסתיר את מפתח הגישה.</div>`;
+}
+function cloudVerifyBoxV82(){
+  return `<div class="cloudVerifyBoxV82">כדי שהלוח יופיע גם בטלפון אחר, צריך לראות אחרי שמירה הודעה: <strong>נשמר בענן וזמין במכשירים אחרים</strong>. אם מופיע שנשמר מקומית בלבד, השינוי קיים רק בדפדפן הזה.</div>`;
+}
+function cloudJsonForCompareV82(value){
+  try{return cloudCanonicalJsonV63(typeof cloudSafeDataV46==="function"?cloudSafeDataV46(value):value)}catch{return JSON.stringify(value||{})}
+}
+async function waitForCloudSaveConfirmV82(expectedJson,timeoutMs=26000){
+  const start=Date.now();
+  let lastError="";
+  while(Date.now()-start<timeoutMs){
+    await new Promise(r=>setTimeout(r,1600));
+    try{
+      const payload=await jsonpLoad();
+      if(payload&&payload.ok&&payload.value){
+        const got=cloudJsonForCompareV82(payload.value);
+        if(got===expectedJson)return {ok:true,payload};
+      }else if(payload&&payload.error){
+        lastError=String(payload.error);
+      }
+    }catch(err){
+      lastError=String(err&&err.message?err.message:err);
+    }
+  }
+  return {ok:false,error:lastError||"לא התקבל אישור מהענן"};
+}
+function currentPatientShareLinkV82(){
+  try{return boardLinksFor(safeBoardId()).patient}catch{return""}
+}
+function currentBackofficeShareLinkV82(){
+  try{return boardLinksFor(safeBoardId()).backoffice}catch{return""}
+}
+async function copyPatientShareLinkV82(){
+  const link=currentPatientShareLinkV82();
+  if(!link)return alert("אין קישור לוח פעיל");
+  await copyText(link);
+  showToast?.("קישור מלא לטלפון/טאבלט הועתק ✅","ok");
+}
+async function copyBackofficeShareLinkV82(){
+  const link=currentBackofficeShareLinkV82();
+  if(!link)return alert("אין קישור ניהול פעיל");
+  await copyText(link);
+  showToast?.("קישור ניהול מלא הועתק ✅","ok");
+}
+async function verifyMobileCloudSaveV82(){
+  try{
+    commitAllInputsToDataV44?.();
+    try{commitDomToData?.()}catch{}
+    save(false);
+    await pushCloud({force:true,silent:false});
+    showToast?.("נשמר בענן וזמין במכשירים אחרים ✅","ok");
+  }catch(err){
+    alert("עדיין לא התקבל אישור שהנתונים בענן. לכן בטלפון אחר ייתכן שיופיע מידע ישן או ריק. פרטים: "+(err&&err.message?err.message:err));
+  }
+}
+/* V82_MOBILE_SHARE_CLOUD_HELPERS */
+
 function boardLinksFor(id){
   const root=appRootUrl();
   const k=currentFamilyAccessKey();
@@ -2323,7 +2409,7 @@ function onboardingHtml(mode="patient"){
   const missing=!hasOwnerCloud();
   const existing=CLOUD.boardId&&cloudOn();
   const links=existing?boardLinksFor(CLOUD.boardId):null;
-  return `<main class="onboard"><div class="onboardBox"><h1>${titleText}</h1><p>ברוכים הבאים. כאן יוצרים לוח אישי למשפחה ומקבלים שני קישורים מוכנים: אחד לטאבלט שבו יוצג הלוח ואחד לעריכה במחשב של המשפחה.</p>${missing?`<div class="ownerMissing">הגדרת בעלת הדף משפחתי עדיין חסרה. לפני שמשתפים עם משפחות, צריך להדביק פעם אחת את כתובת ה-Google Apps Script בקוד במקום OWNER_APPS_SCRIPT_URL. המשתמשים עצמם לא יצטרכו לעשות זאת.</div>`:""}<div class="portalSteps"><div class="portalStep"><div class="portalNum">1</div><div><strong>כתבו שם משפחה או שם לוח</strong><span>לדוגמה: כהן, אמא, אמא. זה רק כדי שיהיה קל לזהות את הלוח.</span></div></div><div class="portalStep"><div class="portalNum">2</div><div><strong>לחצו על יצירת לוח</strong><span>המערכת תיצור מזהה פרטי וארוך כדי שכל משפחה תקבל לוח נפרד.</span></div></div><div class="portalStep"><div class="portalNum">3</div><div><strong>פתחו את שני הקישורים</strong><span>קישור אחד בטאבלט שבו יוצג הלוח, וקישור אחד במחשב של מי שמנהל/ת את הלוח.</span></div></div><div class="portalStep"><div class="portalNum">4</div><div><strong>מומלץ: הוספה למסך הבית</strong><span>בטאבלט שבו יוצג הלוח פתחו את הקישור, לחצו על תפריט השיתוף, ובחרו “הוסף למסך הבית”. כך הלוח נפתח כמו דף משפחתי, בלי שורת כתובת מבלבלת.</span></div></div></div><div class="onboardActions"><div class="onboardCard"><h2>יצירת לוח משפחתי חדש</h2><p>מתאים למשפחה שמתחילה עכשיו.</p><input id="newFamilyName" placeholder="שם משפחה / שם האדם" autocomplete="off"><button class="btn blue portalBigButton" data-a="createBoard" ${missing?"disabled":""}>יצירת לוח וקבלת קישורים</button></div><div class="onboardCard"><h2>כניסה ללוח קיים</h2><p>אם כבר קיבלתם קישור או Family ID, הדביקו אותו כאן.</p><input id="joinBoardInput" placeholder="הדבקת קישור או Family ID" dir="ltr"><button class="btn green portalBigButton" data-a="joinBoard">כניסה ללוח</button></div></div>${existing?`<div class="portalLinksNice"><h2 style="margin:0 0 8px;font-size:32px">הלוח מוכן ✅</h2><p style="font-size:22px;color:#4d6e8e;font-weight:850;margin:0">שמרו את שני הקישורים האלה. אפשר לשלוח אותם בוואטסאפ או במייל.</p><div class="portalLinkCard"><h3>קישור לטאבלט / תצוגת הלוח</h3><p>פותחים בטאבלט שנמצא בבית של האדם.</p><code class="copyableCode" data-copy-text="${esc(links.patient)}" title="לחיצה להעתקה">${esc(links.patient)}</code><div class="copyHint">לחיצה על הקישור מעתיקה אותו</div></div><div class="portalLinkCard"><h3>קישור ל-Backoffice / עריכה</h3><p>פותחים במחשב או בטלפון של בן/בת המשפחה שמעדכנים את הלוח.</p><code class="copyableCode" data-copy-text="${esc(links.backoffice)}" title="לחיצה להעתקה">${esc(links.backoffice)}</code><div class="copyHint">לחיצה על הקישור מעתיקה אותו</div></div><button class="btn soft portalBigButton" data-a="copyLinks">העתקת שני הקישורים</button><div class="portalTiny">Family ID: <code class="copyableCode" data-copy-text="${esc(CLOUD.boardId)}" title="לחיצה להעתקה">${esc(CLOUD.boardId)}</code></div></div>`:""}<div class="portalTiny">אין צורך בידע טכני. אחרי יצירת הלוח, כל שינוי ב-Backoffice מתעדכן אוטומטית בטאבלט בדרך כלל תוך עד דקה.</div></div></main><div id="status" class="status"></div>`;
+  return `<main class="onboard"><div class="onboardBox"><h1>${titleText}</h1><p>ברוכים הבאים. כאן יוצרים לוח אישי למשפחה ומקבלים שני קישורים מוכנים: אחד לטאבלט שבו יוצג הלוח ואחד לעריכה במחשב של המשפחה.</p>${missing?`<div class="ownerMissing">הגדרת בעלת הדף משפחתי עדיין חסרה. לפני שמשתפים עם משפחות, צריך להדביק פעם אחת את כתובת ה-Google Apps Script בקוד במקום OWNER_APPS_SCRIPT_URL. המשתמשים עצמם לא יצטרכו לעשות זאת.</div>`:""}<div class="portalSteps"><div class="portalStep"><div class="portalNum">1</div><div><strong>כתבו שם משפחה או שם לוח</strong><span>לדוגמה: כהן, אמא, אמא. זה רק כדי שיהיה קל לזהות את הלוח.</span></div></div><div class="portalStep"><div class="portalNum">2</div><div><strong>לחצו על יצירת לוח</strong><span>המערכת תיצור מזהה פרטי וארוך כדי שכל משפחה תקבל לוח נפרד.</span></div></div><div class="portalStep"><div class="portalNum">3</div><div><strong>פתחו את שני הקישורים</strong><span>קישור אחד בטאבלט שבו יוצג הלוח, וקישור אחד במחשב של מי שמנהל/ת את הלוח.</span></div></div><div class="portalStep"><div class="portalNum">4</div><div><strong>מומלץ: הוספה למסך הבית</strong><span>בטאבלט שבו יוצג הלוח פתחו את הקישור, לחצו על תפריט השיתוף, ובחרו “הוסף למסך הבית”. כך הלוח נפתח כמו דף משפחתי, בלי שורת כתובת מבלבלת.</span></div></div></div><div class="onboardActions"><div class="onboardCard"><h2>יצירת לוח משפחתי חדש</h2><p>מתאים למשפחה שמתחילה עכשיו.</p><input id="newFamilyName" placeholder="שם משפחה / שם האדם" autocomplete="off"><button class="btn blue portalBigButton" data-a="createBoard" ${missing?"disabled":""}>יצירת לוח וקבלת קישורים</button></div><div class="onboardCard"><h2>כניסה ללוח קיים</h2><p>אם כבר קיבלתם קישור או Family ID, הדביקו אותו כאן.</p><input id="joinBoardInput" placeholder="הדבקת קישור או Family ID" dir="ltr"><button class="btn green portalBigButton" data-a="joinBoard">כניסה ללוח</button></div></div>${existing?`<div class="portalLinksNice"><h2 style="margin:0 0 8px;font-size:32px">הלוח מוכן ✅</h2><p style="font-size:22px;color:#4d6e8e;font-weight:850;margin:0">שמרו את שני הקישורים האלה. אפשר לשלוח אותם בוואטסאפ או במייל.</p><div class="portalLinkCard"><h3>קישור לטאבלט / תצוגת הלוח</h3><p>פותחים בטאבלט שנמצא בבית של האדם.</p><code class="copyableCode" data-copy-text="${esc(links.patient)}" title="לחיצה להעתקה">${esc(links.patient)}</code><div class="copyHint">לחיצה על הקישור מעתיקה אותו</div></div><div class="portalLinkCard"><h3>קישור ל-Backoffice / עריכה</h3><p>פותחים במחשב או בטלפון של בן/בת המשפחה שמעדכנים את הלוח.</p><code class="copyableCode" data-copy-text="${esc(links.backoffice)}" title="לחיצה להעתקה">${esc(links.backoffice)}</code><div class="copyHint">לחיצה על הקישור מעתיקה אותו</div></div>${mobileShareNoteV82()}${cloudVerifyBoxV82()}<div class="actions"><button class="btn green portalBigButton" data-a="copyPatientLinkV82">העתקת קישור מלא לטאבלט/נייד</button><button class="btn soft portalBigButton" data-a="copyBackofficeLinkV82">העתקת קישור ניהול</button><button class="btn blue portalBigButton" data-a="verifyMobileCloudSaveV82">בדיקת שמירה לענן לפני פתיחה בנייד</button></div><button class="btn soft portalBigButton" data-a="copyLinks">העתקת שני הקישורים</button><div class="portalTiny">Family ID: <code class="copyableCode" data-copy-text="${esc(CLOUD.boardId)}" title="לחיצה להעתקה">${esc(CLOUD.boardId)}</code></div></div>`:""}<div class="portalTiny">אין צורך בידע טכני. אחרי יצירת הלוח, כל שינוי ב-Backoffice מתעדכן אוטומטית בטאבלט בדרך כלל תוך עד דקה.</div></div></main><div id="status" class="status"></div>`;
 }
 
 function sendHeartbeat(){
@@ -3843,6 +3929,63 @@ function saveInputs(){
   pushCloud().then(()=>{boClearUnsaved?.();showToast?.("נשמר בענן","ok")}).catch(()=>{document.body.classList.add("has-unsaved");showStatus("נשמר מקומית - לא התקבל אישור ענן")});
   render();
 }
+
+const __pushCloudBeforeMobileVerifyV82=pushCloud;
+pushCloud=async function(options={}){
+  if(!cloudOn())return;
+  options=options||{};
+  commitAllInputsToDataV44?.();
+  try{commitDomToData?.()}catch{}
+  normalizeMusicSettingsV53?.();
+  try{localStorage.setItem(currentStorageKey(),JSON.stringify(data))}catch{}
+
+  const value=(typeof cloudSafeDataV46==="function"?cloudSafeDataV46(data):data);
+  const expected=cloudJsonForCompareV82(value);
+  const silent=!!options.silent || !cloudSaveUiReady;
+  const force=!!options.force;
+
+  if(!force && expected===cloudLast && !getCloudPendingSaveV62?.())return;
+
+  __pendingCloudSaveJsonV58=expected;
+  __pendingCloudSaveAtV58=Date.now();
+  setCloudPendingSaveV62?.(expected);
+
+  if(!silent)try{setSavingButtons(true,"⏳ שומר לענן...")}catch{}
+  const body={action:"save",boardId:safeBoardId(),value,...accessKeyPayload()};
+  try{
+    await fetch(apiBase(),{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(body)
+    });
+  }catch(err){
+    markCloudSync(false);
+    document.body.classList.add("has-unsaved");
+    if(!silent)try{setSavingButtons(false,"⚠️ נשמר רק במחשב הזה")}catch{}
+    throw err;
+  }
+
+  const confirmed=await waitForCloudSaveConfirmV82(expected,silent?14000:30000);
+  if(confirmed.ok){
+    cloudLast=expected;
+    clearCloudPendingSaveV62?.();
+    __pendingCloudSaveJsonV58="";
+    __pendingCloudSaveAtV58=0;
+    markCloudSync(true);
+    boClearUnsaved?.();
+    if(!silent)try{setSavingButtons(false,"✅ נשמר בענן")}catch{}
+    showToast?.("נשמר בענן וזמין במכשירים אחרים ✅","ok");
+    return confirmed.payload;
+  }
+
+  markCloudSync(false);
+  document.body.classList.add("has-unsaved");
+  if(!silent)try{setSavingButtons(false,"⚠️ נשמר מקומית בלבד")}catch{}
+  throw new Error("נשמר בדפדפן הזה, אבל לא התקבל אישור מהענן. "+(confirmed.error||""));
+};
+/* V82_VERIFIED_MOBILE_CLOUD_SAVE */
+
 async function copyText(text){
   try{await navigator.clipboard.writeText(text);showStatus("הועתק")}catch{prompt("העתיקי את הקישור:",text)}
 }
@@ -4212,7 +4355,7 @@ async function sendPing(){
   render();
 }
 
-document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="tab"||a==="setTab"||a==="openTab"){commitAllInputsToDataV44?.();save(false)}if(a==="hardRefreshApp"){hardRefreshApp();return}if(a==="copyPatientLink"){copyBoardLink("patient");return}if(a==="copyAdminLink"){copyBoardLink("admin");return}if(a==="copyVoicePrompt"){copyVoicePrompt(b.dataset.key);return}if(a==="copyAccessKey"){copyAccessKey();return}if(a==="showAccessKey"){showAccessKey();return}if(a==="rotateAccessKey"){rotateAccessKey();return}if(a==="toggleAdminTheme"){toggleAdminTheme();return}if(a==="savePrivateCloud"){savePrivateCloud();return}if(a==="copyPrivateCloudLinks"){copyPrivateCloudLinks();return}if(a==="sendFamilyWhatsapp"){sendFamilyWhatsapp();return}if(a==="stopPlayback"){stopManagedAudio();return}if(a==="openVoiceFolder"){openVoiceFolder();return}if(a==="sendWhatsappInvite"){sendWhatsappInvite();return}if(a==="clearPhoto"){const box=b.closest(".photoTools");if(box){box.querySelector('input[type="hidden"][data-f="photo"]').value="";box.querySelector("[data-photo-preview]").textContent="תמונה";}return}if(a==="createBoard"){createBoard();return}if(a==="joinBoard"){joinBoard(document.getElementById("joinBoardInput")?.value);return}if(a==="copyLinks"){copyShareLinks();return}if(a==="setWeatherCity"){setWeatherCity();return}if(a==="updateWeatherFromProfile"){updateWeatherFromProfile();return}if(a==="tab"){try{commitDomToData();save(false);boClearUnsaved?.();pushCloud({silent:true}).catch(()=>{})}catch{}stopManagedAudio();tab=b.dataset.tab;try{const u=new URL(location.href);u.searchParams.set("tab",tab);history.replaceState(null,"",u.toString());notifyParentRoute(tab)}catch{}render();return}if(a==="goVoice"){tab="voice";try{const u=new URL(location.href);u.searchParams.set("tab","voice");history.replaceState(null,"",u.toString());notifyParentRoute("voice")}catch{}render();return}if(a==="startVoice"){startVoice(b.dataset.key);return}if(a==="stopVoice"){stopVoice(b.dataset.key);return}if(a==="testMusicFolderV74"){testMusicFolderV74();return}if(a==="audioFolderStatusV72"){showAudioFolderStatusV72();return}if(a==="testAudioWriteV73"){testAudioWriteV73();return}if(a==="playVoice"){playVoice(b.dataset.key);return}if(a==="retryVoiceUpload"){retryUploadLocalVoiceV62(b.dataset.key);return}if(a==="deleteVoice"){deleteVoice(b.dataset.key);return}if(a==="saveInputs"||a==="saveAll"){saveInputs();return}if(a==="saveRow")saveRow(b.dataset.type,b.dataset.id);if(a==="addRow")addRow(b.dataset.type);if(a==="delRow")delRow(b.dataset.type,b.dataset.id);if(a==="toggleCare"){data.care[b.dataset.k]=!data.care[b.dataset.k];data.care.date=today();save();render()}if(a==="export")exportJson();if(a==="import")importJson();if(a==="sendPing")sendPing();if(a==="quickPing"){tab="live";render();setTimeout(()=>{const el=document.getElementById("pingText");el?.scrollIntoView({behavior:"smooth",block:"center"});el?.focus();el?.classList.add("quickJumpPulse");setTimeout(()=>el?.classList.remove("quickJumpPulse"),1800)},80);return}if(a==="clearPing"){data.livePing=null;save(false);clearPingCloud?.().catch(()=>pushCloud({silent:true}).catch(()=>{}));render()}if(a==="testHebrewTts"){testHebrewTts();return}if(a==="testChime"){unlockAudio();chime("soft")}if(a==="printSigns"){printCleanSigns();return}if(a==="printBook"){commitDomToData?.();save(false);printCleanBook();return}if(a==="testCloud"){try{await pushCloud();await pullCloud();alert("החיבור לגוגל שיט עובד ✅")}catch(err){alert("לא הצליח להתחבר לגוגל שיט. בדקי את OWNER_APPS_SCRIPT_URL ואת הרשאות ה-Web App.")}}if(a==="full"){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}});
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;if(a==="tab"||a==="setTab"||a==="openTab"){commitAllInputsToDataV44?.();save(false)}if(a==="hardRefreshApp"){hardRefreshApp();return}if(a==="copyPatientLink"){copyBoardLink("patient");return}if(a==="copyAdminLink"){copyBoardLink("admin");return}if(a==="copyVoicePrompt"){copyVoicePrompt(b.dataset.key);return}if(a==="copyAccessKey"){copyAccessKey();return}if(a==="showAccessKey"){showAccessKey();return}if(a==="rotateAccessKey"){rotateAccessKey();return}if(a==="toggleAdminTheme"){toggleAdminTheme();return}if(a==="savePrivateCloud"){savePrivateCloud();return}if(a==="copyPrivateCloudLinks"){copyPrivateCloudLinks();return}if(a==="sendFamilyWhatsapp"){sendFamilyWhatsapp();return}if(a==="stopPlayback"){stopManagedAudio();return}if(a==="openVoiceFolder"){openVoiceFolder();return}if(a==="sendWhatsappInvite"){sendWhatsappInvite();return}if(a==="clearPhoto"){const box=b.closest(".photoTools");if(box){box.querySelector('input[type="hidden"][data-f="photo"]').value="";box.querySelector("[data-photo-preview]").textContent="תמונה";}return}if(a==="createBoard"){createBoard();return}if(a==="joinBoard"){joinBoard(document.getElementById("joinBoardInput")?.value);return}if(a==="copyPatientLinkV82"){copyPatientShareLinkV82();return}if(a==="copyBackofficeLinkV82"){copyBackofficeShareLinkV82();return}if(a==="verifyMobileCloudSaveV82"){verifyMobileCloudSaveV82();return}if(a==="copyLinks"){copyShareLinks();return}if(a==="setWeatherCity"){setWeatherCity();return}if(a==="updateWeatherFromProfile"){updateWeatherFromProfile();return}if(a==="tab"){try{commitDomToData();save(false);boClearUnsaved?.();pushCloud({silent:true}).catch(()=>{})}catch{}stopManagedAudio();tab=b.dataset.tab;try{const u=new URL(location.href);u.searchParams.set("tab",tab);history.replaceState(null,"",u.toString());notifyParentRoute(tab)}catch{}render();return}if(a==="goVoice"){tab="voice";try{const u=new URL(location.href);u.searchParams.set("tab","voice");history.replaceState(null,"",u.toString());notifyParentRoute("voice")}catch{}render();return}if(a==="startVoice"){startVoice(b.dataset.key);return}if(a==="stopVoice"){stopVoice(b.dataset.key);return}if(a==="testMusicFolderV74"){testMusicFolderV74();return}if(a==="audioFolderStatusV72"){showAudioFolderStatusV72();return}if(a==="testAudioWriteV73"){testAudioWriteV73();return}if(a==="playVoice"){playVoice(b.dataset.key);return}if(a==="retryVoiceUpload"){retryUploadLocalVoiceV62(b.dataset.key);return}if(a==="deleteVoice"){deleteVoice(b.dataset.key);return}if(a==="saveInputs"||a==="saveAll"){saveInputs();return}if(a==="saveRow")saveRow(b.dataset.type,b.dataset.id);if(a==="addRow")addRow(b.dataset.type);if(a==="delRow")delRow(b.dataset.type,b.dataset.id);if(a==="toggleCare"){data.care[b.dataset.k]=!data.care[b.dataset.k];data.care.date=today();save();render()}if(a==="export")exportJson();if(a==="import")importJson();if(a==="sendPing")sendPing();if(a==="quickPing"){tab="live";render();setTimeout(()=>{const el=document.getElementById("pingText");el?.scrollIntoView({behavior:"smooth",block:"center"});el?.focus();el?.classList.add("quickJumpPulse");setTimeout(()=>el?.classList.remove("quickJumpPulse"),1800)},80);return}if(a==="clearPing"){data.livePing=null;save(false);clearPingCloud?.().catch(()=>pushCloud({silent:true}).catch(()=>{}));render()}if(a==="testHebrewTts"){testHebrewTts();return}if(a==="testChime"){unlockAudio();chime("soft")}if(a==="printSigns"){printCleanSigns();return}if(a==="printBook"){commitDomToData?.();save(false);printCleanBook();return}if(a==="testCloud"){try{await pushCloud();await pullCloud();alert("החיבור לגוגל שיט עובד ✅")}catch(err){alert("לא הצליח להתחבר לגוגל שיט. בדקי את OWNER_APPS_SCRIPT_URL ואת הרשאות ה-Web App.")}}if(a==="full"){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}});
 setInterval(()=>{if(isOnboardingScreen())return;now=new Date();},1000);
 const __backofficeRenderBase=render;
 render=function(){
@@ -4447,4 +4590,8 @@ if("serviceWorker" in navigator){
 /* V78_JSONP_LATE_CALLBACK_FIX_BOINDEX */
 
 /* V79_PATIENT_PRINT_MUSIC_PRIVACY_BOINDEX */
+
+/* V82_MOBILE_LINK_NOTE_IN_ACCESS_MANAGER */
+
+/* V82_MOBILE_CLOUD_SHARE_FIX_BOINDEX */
 </script></body></html>

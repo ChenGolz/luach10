@@ -2368,13 +2368,7 @@ function urlWithFamilyKey(url,key=currentFamilyAccessKey()){
 function hasFamilyAccessKey(){
   return !!currentFamilyAccessKey();
 }
-function saveManualAccessKey(){
-  const el=document.getElementById("manualAccessKey");
-  const key=String(el&&el.value||"").trim();
-  if(!key)return alert("לא הוזן מפתח");
-  localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,key);
-  location.reload();
-}
+function saveManualAccessKey(){const el=document.getElementById("manualAccessKey");const key=String(el&&el.value||"").trim();if(!key)return alert("לא הוזן מפתח");try{setFamilyAccessKeyV52?setFamilyAccessKeyV52(key):localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,key)}catch{localStorage.setItem(FAMILY_ACCESS_KEY_STORAGE,key)}location.reload();}
 function missingAccessKeyNotice(){
   if(hasFamilyAccessKey())return"";
   return `<section class="card" style="border:2px solid #f1d596;background:#fff7df;color:#4b3b18"><h2>🔐 ייתכן שחסר מפתח גישה</h2><p>אם הלוח לא נטען או לא נשמר, פתחו שוב את הקישור המקורי שקיבלתם במשפחה. אפשר גם להדביק כאן את המפתח אם הוא נשלח בנפרד.</p><input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left"><button class="btn green" onclick="saveManualAccessKey()">שמירת מפתח וטעינה מחדש</button></section>`;
@@ -3813,7 +3807,36 @@ function safeBlockHtml(fnName){
 }
 
 
-function render(){updateBackgroundByTime();if(isOnboardingScreen()){const app=document.getElementById("app");if(!app.dataset.onboarding){app.dataset.onboarding="patient";app.innerHTML=onboardingHtml("patient");}return}if(data.care.date!==today()){data.care={...DEFAULT.care,date:today()};save()}const absoluteNight=data.settings.nightModeEnabled&&timeInRange(now,data.settings.nightStart,data.settings.nightEnd)&&Date.now()>forceDayUntil;if(absoluteNight&&!data.livePing?.ack){document.getElementById("app").innerHTML=`${statusBadges()}${patientRuntimeBadgesHtml()}${safeOptionalHtml("pingHtml")}${safeBlockHtml("nightScreen")}`;return}if(absoluteNight){document.getElementById("app").innerHTML=statusBadges()+patientRuntimeBadgesHtml()+safeBlockHtml("nightScreen");return}document.getElementById("app").innerHTML=`${statusBadges()}${safeOptionalHtml("musicHtml")}${safeOptionalHtml("calmHtml")}${safeOptionalHtml("pingHtml")}${(screensaver&&!data.livePing)?safeBlockHtml("memories"):""}<div class="shell">${header()}${data.stage==="advanced"?`<section class="section grid">${safeBlockHtml("nowNext")}${safeBlockHtml("phones")}<div class="card warm"><div class="big">${esc(data.safety.confusedMessage)}</div></div></section>`:`${safeBlockHtml("orient")}<section class="section grid wide">${safeBlockHtml("nowNext")}${safeBlockHtml("phones")}</section>${safeBlockHtml("daily")}${safeBlockHtml("family")}`}</div>${patientRuntimeBadgesHtml()}${softFullscreenExitHtml()}${patientExitFullscreenHtmlV62()}${fullscreenActionsHtmlV51()}<div id="status" class="status"></div>`}
+
+function hasLocalBoardDataV82(){
+  try{
+    const raw=localStorage.getItem(currentStorageKey());
+    if(!raw)return false;
+    const obj=JSON.parse(raw);
+    return !!(obj && (obj.boardCreatedAt || (obj.profile&&obj.profile.name) || (Array.isArray(obj.family)&&obj.family.length) || (Array.isArray(obj.schedule)&&obj.schedule.length)));
+  }catch{return false}
+}
+function patientHasBoardParamV82(){
+  try{return !!String(new URLSearchParams(location.search).get("board")||"").trim()}catch{return false}
+}
+function patientMobileMissingKeyScreenV82(){
+  return `<main class="onboard"><div class="onboardBox" style="max-width:880px">
+    <h1>צריך קישור מלא ללוח</h1>
+    <p>הטלפון הזה לא מכיר עדיין את הלוח. צריך לפתוח את הקישור המלא שקיבלת מהניהול - הקישור שכולל מפתח גישה.</p>
+    <div class="ownerMissing" style="background:#fff7df;border-color:#f1d596;color:#4b3b18">
+      אם העתקת את הכתובת מתוך שורת הדפדפן אחרי שהלוח כבר נטען, ייתכן שהחלק הסודי של הקישור הוסר אוטומטית. צריך להעתיק שוב מתוך מסך הניהול: <strong>קישור לטאבלט / תצוגת הלוח</strong>.
+    </div>
+    <p>אפשר גם להדביק כאן את מפתח הגישה אם הוא נשלח בנפרד:</p>
+    <input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left;width:100%;border:2px solid #cce2f7;border-radius:18px;padding:14px;font-size:22px">
+    <button class="btn green portalBigButton" onclick="saveManualAccessKey()">שמירת מפתח וטעינה מחדש</button>
+  </div></main><div id="status" class="status"></div>`;
+}
+function shouldShowMissingKeyScreenV82(){
+  return patientHasBoardParamV82() && !hasFamilyAccessKey() && !hasLocalBoardDataV82();
+}
+/* V82_MOBILE_MISSING_KEY_SCREEN */
+
+function render(){updateBackgroundByTime();if(shouldShowMissingKeyScreenV82?.()){document.getElementById("app").innerHTML=patientMobileMissingKeyScreenV82();return}if(isOnboardingScreen()){const app=document.getElementById("app");if(!app.dataset.onboarding){app.dataset.onboarding="patient";app.innerHTML=onboardingHtml("patient");}return}if(data.care.date!==today()){data.care={...DEFAULT.care,date:today()};save()}const absoluteNight=data.settings.nightModeEnabled&&timeInRange(now,data.settings.nightStart,data.settings.nightEnd)&&Date.now()>forceDayUntil;if(absoluteNight&&!data.livePing?.ack){document.getElementById("app").innerHTML=`${statusBadges()}${patientRuntimeBadgesHtml()}${safeOptionalHtml("pingHtml")}${safeBlockHtml("nightScreen")}`;return}if(absoluteNight){document.getElementById("app").innerHTML=statusBadges()+patientRuntimeBadgesHtml()+safeBlockHtml("nightScreen");return}document.getElementById("app").innerHTML=`${statusBadges()}${safeOptionalHtml("musicHtml")}${safeOptionalHtml("calmHtml")}${safeOptionalHtml("pingHtml")}${(screensaver&&!data.livePing)?safeBlockHtml("memories"):""}<div class="shell">${header()}${data.stage==="advanced"?`<section class="section grid">${safeBlockHtml("nowNext")}${safeBlockHtml("phones")}<div class="card warm"><div class="big">${esc(data.safety.confusedMessage)}</div></div></section>`:`${safeBlockHtml("orient")}<section class="section grid wide">${safeBlockHtml("nowNext")}${safeBlockHtml("phones")}</section>${safeBlockHtml("daily")}${safeBlockHtml("family")}`}</div>${patientRuntimeBadgesHtml()}${softFullscreenExitHtml()}${patientExitFullscreenHtmlV62()}${fullscreenActionsHtmlV51()}<div id="status" class="status"></div>`}
 function checkAutomation(){const current=(typeof nxl==="function"?nxl():{}).n;const id=current?String(current.id):"";if(id&&lastNowId&&id!==lastNowId&&data.settings.anchorChime&&!timeInRange(now,data.settings.nightStart,data.settings.nightEnd))chime("soft");if(id&&id!==lastNowId){lastNowId=id;localStorage.setItem("luach_last_now_id",id)}const p=data.livePing;if(p&&!p.ack&&p.createdAt&&p.durationMs&&Date.now()>Number(p.createdAt)+Number(p.durationMs)){data.livePing=null;save();}if(data.livePing&&!data.livePing.ack&&String(data.livePing.id)!==lastPingId){lastPingId=String(data.livePing.id);localStorage.setItem("luach_last_ping_id",lastPingId);if(data.settings.livePingChime)chime("ping")}if(data.settings.screensaverEnabled&&!calm&&!data.livePing&&!timeInRange(now,data.settings.nightStart,data.settings.nightEnd)){const idle=Date.now()-lastActivity;if(idle>Number(data.settings.screensaverMinutes||5)*60000&&!screensaver){screensaver=true;render()}}}
 
 function passiveMessage(){
@@ -4927,4 +4950,6 @@ document.addEventListener("visibilitychange",()=>{try{applyPatientFullscreenClas
 /* V80_MUSIC_SHUFFLE_PATIENT */
 
 /* V81_MUSIC_FAST_SELECT_FIX_PATIENT */
+
+/* V82_MOBILE_CLOUD_SHARE_FIX_PATIENT */
 </script></body></html>

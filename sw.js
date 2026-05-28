@@ -1,4 +1,4 @@
-const CACHE_NAME="family-clock-v81-music-fast-select-fix";
+const CACHE_NAME="family-clock-v82-mobile-cloud-share-fix";
 const AUDIO_CACHE_NAME="family-clock-drive-audio-runtime-v3";
 
 const CORE_FILES=[
@@ -264,3 +264,5 @@ self.addEventListener("fetch",event=>{
 /* V80_MUSIC_SHUFFLE_SW */
 
 /* V81_MUSIC_FAST_SELECT_FIX_SW */
+
+/* V82_MOBILE_CLOUD_SHARE_FIX_SW */

@@ -1,0 +1,39 @@
+LUACH V82 MOBILE CLOUD SHARE FIX QA
+Total checks: 15
+Passed: 15
+Failed: 0
+
+Root cause addressed:
+- localStorage is per device/browser; data edited on PC appears on mobile only after confirmed cloud save.
+- mobile/new browser must open the full patient link including the #key fragment at least once.
+- copying the browser address bar after the app cleaned the hash produces an incomplete link.
+
+What changed:
+- Patient shows a clear missing-key screen instead of default/empty data when a mobile link is incomplete.
+- Backoffice now has explicit copy buttons for the full tablet/mobile link and management link.
+- Backoffice warns not to copy from the browser address bar after the hash was removed.
+- Backoffice save now verifies by loading back from Apps Script before saying it is available on other devices.
+- Added a button to verify cloud save before opening on mobile.
+
+Files included:
+- patient.html
+- boindex.html
+- sw.js
+- apps-script/Code.gs
+
+Checks:
+- PASS: syntax patient.html
+- PASS: syntax boindex.html
+- PASS: syntax sw.js
+- PASS: syntax apps-script/Code.gs
+- PASS: patient missing key screen
+- PASS: patient render guard
+- PASS: manual key scoped
+- PASS: bo mobile share helpers
+- PASS: bo full link note
+- PASS: bo explicit buttons
+- PASS: verified cloud save override
+- PASS: cloud confirmation success text
+- PASS: V81 music retained
+- PASS: sw cache
+- PASS: markers

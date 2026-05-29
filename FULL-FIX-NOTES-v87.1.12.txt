@@ -1,0 +1,15 @@
+Luach v87.1.12 full fixed package
+
+Based on uploaded luach10-main.zip, with the release issues fixed:
+
+- Added backend Code.gs and apps-script/Code.gs from the latest voice-sync backend.
+- Bumped backend APP_VERSION to v87.1.12-full-fixed.
+- Replaced index.html with the guarded private API / Drive setup flow.
+- Replaced backoffice/index.html with a redirect to ../boindex.html so the stale old backoffice cannot be used.
+- Bumped boindex.html export metadata to v87.1.12-full-fixed.
+- Kept current boindex.html, patient.html, sw.js, manifest and assets from the uploaded package.
+
+Deployment reminder:
+- Upload frontend files to GitHub/static hosting.
+- Deploy Code.gs as a new Apps Script web app version.
+- Hard refresh or clear site data on patient/backoffice devices.

@@ -259,7 +259,7 @@ function missingKeyHtml(){
   const hasBoard=!!currentBoard();
   const hasKey=!!currentFamilyAccessKey();
   if(!hasBoard||hasKey)return"";
-  return `<div class="card" style="border:2px solid #f1d596;background:#fff7df;color:#4b3b18"><h2>🔐 ייתכן שחסר מפתח גישה</h2><p>אם הלוח לא נטען, פתחו שוב את הקישור המקורי שקיבלתם במשפחה. אפשר גם להדביק כאן את המפתח אם הוא נשלח בנפרד.</p><input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left"><button class="bigBtn" onclick="saveManualAccessKey()">שמירת מפתח וטעינה מחדש</button></div>`;
+  return `<div class="card" style="border:2px solid #f1d596;background:#fff7df;color:#4b3b18"><h2>🔐 ייתכן שחסר מפתח גישה</h2><p>אם הלוח לא נטען, פתחו שוב את הקישור המקורי שקיבלתם במשפחה. אפשר גם להדביק כאן את המפתח אם הוא נשלח בנפרד.</p><input id="manualAccessKey" placeholder="הדבקת מפתח גישה" style="direction:ltr;text-align:left"><button class="bigBtn" data-a="saveManualAccessKeyV87">שמירת מפתח וטעינה מחדש</button></div>`;
 }
 function saveManualAccessKey(){
   const el=document.getElementById("manualAccessKey");
@@ -313,6 +313,34 @@ setFamilyAccessKey=setFamilyAccessKeyV52;
 accessKeyFromUrlOrStorage=accessKeyFromUrlOrStorageV52;
 
 
+
+function isAllowedAppsScriptUrlV87(value){
+  value=String(value||"").trim();
+  if(!value)return false;
+  try{
+    const u=new URL(value);
+    if(u.protocol!=="https:")return false;
+    if(u.hostname==="script.google.com" && /^\/macros\/s\/[^/]+\/exec$/.test(u.pathname))return true;
+    if(u.hostname==="script.googleusercontent.com" && u.pathname.indexOf("/macros/")>=0)return true;
+    return false;
+  }catch{return false}
+}
+function approveApiUrlFromQueryV87(value){
+  value=String(value||"").trim();
+  if(!value)return "";
+  if(!isAllowedAppsScriptUrlV87(value)){
+    alert("כתובת Apps Script בקישור לא נראית תקינה ולכן לא נשמרה.");
+    return "";
+  }
+  const key="luach_approved_api_url_v87_"+value;
+  if(sessionStorage.getItem(key)==="1")return value;
+  const ok=confirm("הקישור מנסה להגדיר כתובת ענן/Apps Script חדשה. לאשר רק אם זה קישור שאת/ה סומך/ת עליו.\n\n"+value);
+  if(!ok)return "";
+  sessionStorage.setItem(key,"1");
+  return value;
+}
+/* V87_API_URL_CONFIRMATION_GUARD */
+
 const PRIVATE_CLOUD_KEY="family_clock_private_apps_script_url_v17";
 const PRIVATE_DRIVE_KEY="family_clock_private_drive_folder_v17";
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -321,17 +349,97 @@ function folderIdFromUrlGlobal(value){
   const m=value.match(/\/folders\/([a-zA-Z0-9_-]+)/);
   return m?m[1]:value;
 }
+
+const TRUSTED_API_MARKER_PREFIX="luach_trusted_api_url_v871_";
+const TRUSTED_DRIVE_MARKER_PREFIX="luach_trusted_drive_folder_v871_";
+function trustedApiMarkerKey(url){return TRUSTED_API_MARKER_PREFIX+String(url||"")}
+function markTrustedApiUrlV871(url){url=String(url||"").trim();if(url)localStorage.setItem(trustedApiMarkerKey(url),"1")}
+function clearTrustedApiUrlV871(){const saved=String(localStorage.getItem(PRIVATE_CLOUD_KEY)||"").trim();if(saved)localStorage.removeItem(trustedApiMarkerKey(saved));localStorage.removeItem(PRIVATE_CLOUD_KEY)}
+function rememberTrustedApiUrlV871(url){
+  url=String(url||"").trim();
+  if(!url)return "";
+  if(typeof isAllowedAppsScriptUrlV87==="function"&&!isAllowedAppsScriptUrlV87(url))return "";
+  localStorage.setItem(PRIVATE_CLOUD_KEY,url);
+  markTrustedApiUrlV871(url);
+  return url;
+}
+function trustSavedApiUrlOrClearV871(url){
+  url=String(url||"").trim();
+  if(!url)return "";
+  const isOwner=url===OWNER_APPS_SCRIPT_URL;
+  if(!isOwner&&typeof isAllowedAppsScriptUrlV87==="function"&&!isAllowedAppsScriptUrlV87(url))return "";
+  if(!isOwner&&localStorage.getItem(trustedApiMarkerKey(url))!=="1"){
+    const ok=confirm("נמצא חיבור ענן פרטי שנשמר מגרסה קודמת. לאשר רק אם זו כתובת Apps Script של המשפחה.\n\n"+url);
+    if(!ok)return "";
+    markTrustedApiUrlV871(url);
+  }
+  return url;
+}
+function readTrustedPrivateApiUrlV871(){
+  const saved=String(localStorage.getItem(PRIVATE_CLOUD_KEY)||"").trim();
+  const trusted=trustSavedApiUrlOrClearV871(saved);
+  if(!trusted&&saved)clearTrustedApiUrlV871();
+  return trusted;
+}
+function trustedDriveMarkerKey(folder){return TRUSTED_DRIVE_MARKER_PREFIX+String(folder||"")}
+function isAllowedDriveFolderIdV871(value){value=String(value||"").trim();return /^[A-Za-z0-9_-]{10,200}$/.test(value)}
+function rememberTrustedDriveFolderV871(folder){
+  folder=folderIdFromUrlGlobal(folder);
+  if(!folder)return "";
+  if(!isAllowedDriveFolderIdV871(folder))return "";
+  localStorage.setItem(PRIVATE_DRIVE_KEY,folder);
+  localStorage.setItem(trustedDriveMarkerKey(folder),"1");
+  return folder;
+}
+function readTrustedDriveFolderV871(){
+  const saved=String(localStorage.getItem(PRIVATE_DRIVE_KEY)||"").trim();
+  if(!saved)return "";
+  if(!isAllowedDriveFolderIdV871(saved)){
+    localStorage.removeItem(PRIVATE_DRIVE_KEY);
+    return "";
+  }
+  if(localStorage.getItem(trustedDriveMarkerKey(saved))!=="1"){
+    const ok=confirm("נמצאה תיקיית Drive פרטית שנשמרה מגרסה קודמת. לאשר רק אם זו תיקייה של המשפחה.\n\n"+saved);
+    if(!ok){
+      localStorage.removeItem(PRIVATE_DRIVE_KEY);
+      return "";
+    }
+    localStorage.setItem(trustedDriveMarkerKey(saved),"1");
+  }
+  return saved;
+}
+function approveDriveFolderFromQueryV871(value){
+  const folder=folderIdFromUrlGlobal(value);
+  if(!folder)return "";
+  if(!isAllowedDriveFolderIdV871(folder)){
+    alert("קישור תיקיית Drive בקישור לא נראה תקין ולכן לא נשמר.");
+    return "";
+  }
+  const key="luach_approved_drive_folder_v871_"+folder;
+  if(sessionStorage.getItem(key)==="1")return folder;
+  const ok=confirm("הקישור מנסה להגדיר תיקיית Drive פרטית להקלטות. לאשר רק אם זו תיקייה של המשפחה.\n\n"+folder);
+  if(!ok)return "";
+  sessionStorage.setItem(key,"1");
+  return folder;
+}
+
 function currentCloudUrl(){
   const p=getParams();
   const fromUrl=p.get("api")||p.get("cloudUrl")||"";
-  if(fromUrl){localStorage.setItem(PRIVATE_CLOUD_KEY,fromUrl);return fromUrl}
-  return localStorage.getItem(PRIVATE_CLOUD_KEY)||OWNER_APPS_SCRIPT_URL||"";
+  if(fromUrl){
+    const approved=approveApiUrlFromQueryV87(fromUrl);
+    if(approved)return rememberTrustedApiUrlV871(approved)||OWNER_APPS_SCRIPT_URL||"";
+  }
+  return readTrustedPrivateApiUrlV871()||OWNER_APPS_SCRIPT_URL||"";
 }
 function currentDriveFolder(){
   const p=getParams();
-  const fromUrl=folderIdFromUrlGlobal(p.get("driveFolder")||"");
-  if(fromUrl){localStorage.setItem(PRIVATE_DRIVE_KEY,fromUrl);return fromUrl}
-  return localStorage.getItem(PRIVATE_DRIVE_KEY)||"";
+  const fromUrl=p.get("driveFolder")||"";
+  if(fromUrl){
+    const approved=approveDriveFolderFromQueryV871(fromUrl);
+    if(approved)return rememberTrustedDriveFolderV871(approved);
+  }
+  return readTrustedDriveFolderV871();
 }
 function addPrivateParams(params){
   const api=currentCloudUrl();
@@ -348,14 +456,22 @@ function savePrivateCloudSetup(){
   const api=(document.getElementById("privateCloudUrl")?.value||"").trim();
   const folder=folderIdFromUrlGlobal((document.getElementById("privateDriveFolder")?.value||"").trim());
   if(!api)return alert("צריך להדביק Google Apps Script Web App URL. קישור רגיל לגוגל שיט לא מספיק.");
-  localStorage.setItem(PRIVATE_CLOUD_KEY,api);
-  if(folder)localStorage.setItem(PRIVATE_DRIVE_KEY,folder);
+  if(typeof isAllowedAppsScriptUrlV87==="function" && !isAllowedAppsScriptUrlV87(api))return alert("כתובת Apps Script לא תקינה. צריך Web App URL שמתחיל ב-https://script.google.com/macros/s/.../exec");
+  rememberTrustedApiUrlV871(api);
+  if(folder){
+    if(!isAllowedDriveFolderIdV871(folder))return alert("Folder ID של Drive לא תקין.");
+    rememberTrustedDriveFolderV871(folder);
+  }
   alert("החיבור הפרטי נשמר ✅ עכשיו כל לוח שתפתחו ישתמש בענן הזה.");
   render();
 }
+/* V871_VALIDATED_PRIVATE_CLOUD_SETUP_INDEX */
+
 function clearPrivateCloudSetup(){
   if(!confirm("למחוק מהמכשיר הזה את החיבור הפרטי?"))return;
-  localStorage.removeItem(PRIVATE_CLOUD_KEY);
+  clearTrustedApiUrlV871();
+  const savedDrive=String(localStorage.getItem(PRIVATE_DRIVE_KEY)||"").trim();
+  if(savedDrive)localStorage.removeItem(trustedDriveMarkerKey(savedDrive));
   localStorage.removeItem(PRIVATE_DRIVE_KEY);
   alert("החיבור הפרטי נמחק מהמכשיר הזה.");
   render();
@@ -678,6 +794,36 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 
 
 /* V78_JSONP_LATE_CALLBACK_FIX_INDEX */
+
+window.addEventListener("DOMContentLoaded",()=>{
+  try{
+    const app=document.getElementById("app");
+    if(!app)return;
+    // V84 guard only: if an earlier router already rendered, do nothing.
+  }catch(err){}
+});
+/* V84_INDEX_DOM_READY_GUARD */
+
+
+/* V84_SCALE_SECURITY_TEMPLATE_INDEX */
+
+/* V86_STABILITY_HARDENING_INDEX */
+
+/* V87_API_URL_GUARD_INDEX */
+
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-a='saveManualAccessKeyV87']");
+  if(!b)return;
+  e.preventDefault();
+  if(typeof saveManualAccessKey==="function")saveManualAccessKey();
+});
+/* V87_MANUAL_ACCESS_KEY_HANDLER */
+
+
+/* V87_SECURITY_RELEASE_CANDIDATE_INDEX */
+
+/* V871_SECURITY_BLOCKERS_FIX_INDEX */
 </script>
 </body>
 </html>

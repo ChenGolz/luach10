@@ -4575,7 +4575,7 @@ function exportJson(){
     const payload={
       exported_at:new Date().toISOString(),
       boardId:safeBoardId(),
-      version:"v87.1.8-local-edit-guard",
+      version:"v87.1.12-full-fixed",
       value:data
     };
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"});

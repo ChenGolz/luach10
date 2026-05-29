@@ -2208,6 +2208,296 @@ body.patient-soft-fullscreen .patientFullActions{
 }
 /* /V87111_PATIENT_FULLSCREEN_AND_MUSIC_UI_FIX */
 
+
+
+/* V87112_PATIENT_FULLSCREEN_LAYOUT_FIX
+   Final override for fullscreen: keep only the calm dashboard sections visible,
+   reserve space for the action dock, and prevent large cards from clipping. */
+body.patient-fullscreen,
+body.patient-soft-fullscreen{
+  background:#eef7ff!important;
+  overflow:hidden!important;
+  width:100vw!important;
+  height:100dvh!important;
+}
+body.patient-fullscreen .shell,
+body.patient-soft-fullscreen .shell{
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(150px,25dvh) minmax(190px,34dvh) minmax(0,1fr)!important;
+  gap:clamp(7px,.9dvh,12px)!important;
+  padding:clamp(7px,.9dvh,12px)!important;
+  padding-bottom:clamp(58px,7.4dvh,76px)!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  overscroll-behavior:contain!important;
+}
+body.patient-fullscreen .hero,
+body.patient-soft-fullscreen .hero{
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  padding:clamp(8px,1dvh,14px)!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:clamp(20px,2vw,34px)!important;
+}
+body.patient-fullscreen .hero-grid,
+body.patient-soft-fullscreen .hero-grid{
+  height:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.25fr) minmax(210px,.72fr)!important;
+  gap:clamp(8px,1vw,14px)!important;
+  align-items:center!important;
+}
+body.patient-fullscreen .h1,
+body.patient-soft-fullscreen .h1{
+  font-size:clamp(34px,5.4dvh,64px)!important;
+  line-height:.96!important;
+  margin:4px 0!important;
+}
+body.patient-fullscreen .lead,
+body.patient-soft-fullscreen .lead{
+  font-size:clamp(17px,2.25dvh,28px)!important;
+  line-height:1.12!important;
+  margin:6px 0 0!important;
+  max-height:3.5em!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .pill,
+body.patient-soft-fullscreen .pill{
+  font-size:clamp(13px,1.55dvh,19px)!important;
+  padding:5px 10px!important;
+}
+body.patient-fullscreen .clock-card,
+body.patient-soft-fullscreen .clock-card{
+  width:100%!important;
+  min-width:0!important;
+  padding:clamp(7px,.85dvh,12px)!important;
+  transform:none!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .analog,
+body.patient-soft-fullscreen .analog{
+  width:clamp(74px,11dvh,112px)!important;
+  height:clamp(74px,11dvh,112px)!important;
+}
+body.patient-fullscreen .digital,
+body.patient-soft-fullscreen .digital{
+  font-size:clamp(38px,5.8dvh,66px)!important;
+  letter-spacing:-1.5px!important;
+}
+body.patient-fullscreen .digital12,
+body.patient-soft-fullscreen .digital12,
+body.patient-fullscreen .date,
+body.patient-soft-fullscreen .date{
+  font-size:clamp(13px,1.85dvh,22px)!important;
+  line-height:1.08!important;
+}
+body.patient-fullscreen .today,
+body.patient-soft-fullscreen .today,
+body.patient-fullscreen .weatherInline,
+body.patient-soft-fullscreen .weatherInline{
+  font-size:clamp(12px,1.55dvh,18px)!important;
+  padding:5px 9px!important;
+  margin-top:5px!important;
+}
+body.patient-fullscreen .progressBoxV79,
+body.patient-soft-fullscreen .progressBoxV79{
+  padding:5px 8px!important;
+  margin-top:5px!important;
+}
+body.patient-fullscreen .progressCaption,
+body.patient-soft-fullscreen .progressCaption{display:none!important}
+body.patient-fullscreen .section.grid.wide,
+body.patient-soft-fullscreen .section.grid.wide,
+body.patient-fullscreen .daily,
+body.patient-soft-fullscreen .daily{
+  display:none!important;
+}
+body.patient-fullscreen .orientCompact,
+body.patient-soft-fullscreen .orientCompact{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(7px,.85vw,12px)!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  margin:0!important;
+}
+body.patient-fullscreen .orientCompact .card,
+body.patient-soft-fullscreen .orientCompact .card{
+  min-height:0!important;
+  height:100%!important;
+  padding:clamp(9px,1dvh,14px)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+body.patient-fullscreen .title,
+body.patient-soft-fullscreen .title{
+  gap:6px!important;
+  margin-bottom:clamp(4px,.55dvh,8px)!important;
+}
+body.patient-fullscreen .title h2,
+body.patient-soft-fullscreen .title h2{
+  font-size:clamp(20px,3.05dvh,34px)!important;
+  line-height:1!important;
+}
+body.patient-fullscreen .icon,
+body.patient-soft-fullscreen .icon{
+  width:clamp(36px,4.8dvh,52px)!important;
+  height:clamp(36px,4.8dvh,52px)!important;
+  font-size:clamp(22px,3.2dvh,34px)!important;
+}
+body.patient-fullscreen .orientCompact .big,
+body.patient-soft-fullscreen .orientCompact .big{
+  font-size:clamp(19px,3.05dvh,34px)!important;
+  line-height:1.08!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .orientCompact .medium,
+body.patient-soft-fullscreen .orientCompact .medium{
+  font-size:clamp(14px,2.0dvh,22px)!important;
+  line-height:1.12!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .safeMsg,
+body.patient-soft-fullscreen .safeMsg{
+  margin-top:auto!important;
+  padding:clamp(7px,.8dvh,10px)!important;
+  font-size:clamp(13px,1.8dvh,20px)!important;
+  max-height:4.8em!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .patientFamilySection,
+body.patient-soft-fullscreen .patientFamilySection{
+  display:block!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:clamp(7px,.9dvh,12px)!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .patientFamilySection .title,
+body.patient-soft-fullscreen .patientFamilySection .title{
+  margin-bottom:clamp(3px,.45dvh,7px)!important;
+}
+body.patient-fullscreen .patientFamilySection .title h2,
+body.patient-soft-fullscreen .patientFamilySection .title h2{
+  font-size:clamp(17px,2.35dvh,28px)!important;
+}
+body.patient-fullscreen .familygrid,
+body.patient-soft-fullscreen .familygrid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(6px,.75vw,10px)!important;
+  height:calc(100% - 44px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body.patient-fullscreen .familygrid .contact,
+body.patient-soft-fullscreen .familygrid .contact{
+  height:100%!important;
+  min-height:0!important;
+  padding:clamp(7px,.8dvh,11px)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+body.patient-fullscreen .familygrid .contact:nth-child(n+4),
+body.patient-soft-fullscreen .familygrid .contact:nth-child(n+4){display:none!important}
+body.patient-fullscreen .familygrid .contact .avatar,
+body.patient-soft-fullscreen .familygrid .contact .avatar{
+  width:clamp(40px,5.2dvh,58px)!important;
+  height:clamp(40px,5.2dvh,58px)!important;
+  font-size:clamp(25px,3.8dvh,42px)!important;
+}
+body.patient-fullscreen .familygrid .contact .big,
+body.patient-soft-fullscreen .familygrid .contact .big{
+  font-size:clamp(17px,2.2dvh,25px)!important;
+  line-height:1.05!important;
+}
+body.patient-fullscreen .familygrid .contact .medium,
+body.patient-soft-fullscreen .familygrid .contact .medium,
+body.patient-fullscreen .familygrid .contact [style*="font-size:28px"],
+body.patient-soft-fullscreen .familygrid .contact [style*="font-size:28px"]{
+  font-size:clamp(12px,1.65dvh,18px)!important;
+  line-height:1.08!important;
+  margin-top:4px!important;
+}
+body.patient-fullscreen .familygrid .contact .small,
+body.patient-soft-fullscreen .familygrid .contact .small{display:none!important}
+body.patient-fullscreen .patientFullActions,
+body.patient-soft-fullscreen .patientFullActions{
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  max-width:min(94vw,760px)!important;
+  min-height:0!important;
+  padding:6px!important;
+  gap:6px!important;
+  z-index:10000!important;
+  border-radius:999px!important;
+  opacity:.92!important;
+}
+body.patient-fullscreen .patientFullActions button,
+body.patient-soft-fullscreen .patientFullActions button{
+  min-height:40px!important;
+  padding:7px 12px!important;
+  font-size:clamp(14px,1.75dvh,19px)!important;
+}
+body.patient-fullscreen .patientExitFullscreenV62,
+body.patient-soft-fullscreen .patientExitFullscreenV62{
+  top:auto!important;
+  left:max(8px,env(safe-area-inset-left))!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  min-height:40px!important;
+  padding:7px 12px!important;
+  font-size:clamp(13px,1.65dvh,18px)!important;
+  opacity:.82!important;
+}
+@media(max-height:720px){
+  body.patient-fullscreen .shell,
+  body.patient-soft-fullscreen .shell{
+    grid-template-rows:minmax(132px,23dvh) minmax(170px,35dvh) minmax(0,1fr)!important;
+    padding-bottom:58px!important;
+  }
+  body.patient-fullscreen .lead,body.patient-soft-fullscreen .lead{max-height:2.4em!important}
+  body.patient-fullscreen .familygrid .contact .avatar,body.patient-soft-fullscreen .familygrid .contact .avatar{display:none!important}
+}
+@media(max-width:760px),(orientation:portrait){
+  body.patient-fullscreen .shell,
+  body.patient-soft-fullscreen .shell{
+    display:block!important;
+    overflow:auto!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    padding-bottom:74px!important;
+  }
+  body.patient-fullscreen .hero-grid,body.patient-soft-fullscreen .hero-grid,
+  body.patient-fullscreen .orientCompact,body.patient-soft-fullscreen .orientCompact,
+  body.patient-fullscreen .familygrid,body.patient-soft-fullscreen .familygrid{
+    grid-template-columns:1fr!important;
+    height:auto!important;
+  }
+  body.patient-fullscreen .patientFamilySection,body.patient-soft-fullscreen .patientFamilySection,
+  body.patient-fullscreen .orientCompact .card,body.patient-soft-fullscreen .orientCompact .card,
+  body.patient-fullscreen .familygrid .contact,body.patient-soft-fullscreen .familygrid .contact{
+    height:auto!important;
+  }
+  body.patient-fullscreen .familygrid .contact:nth-child(n+4),body.patient-soft-fullscreen .familygrid .contact:nth-child(n+4){display:flex!important}
+}
+/* /V87112_PATIENT_FULLSCREEN_LAYOUT_FIX */
+
 </style><link rel="manifest" href="./manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">

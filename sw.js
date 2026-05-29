@@ -1,4 +1,4 @@
-const CACHE_NAME="family-clock-v87-1-10-music-guard";
+const CACHE_NAME="family-clock-v87-1-11-music-days-fullscreen";
 const AUDIO_CACHE_NAME="family-clock-drive-audio-runtime-v3";
 
 const CORE_FILES=[
